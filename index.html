@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      display: flex; 
+      height: 100vh; 
+      background-color: #f4f7f6; 
+    }
+    
+    /* Sidebar Styles */
+    #sidebar { 
+      width: 260px; 
+      background-color: #2c3e50; 
+      color: white; 
+      display: flex; 
+      flex-direction: column; 
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .header { 
+      padding: 25px 20px; 
+      text-align: center; 
+      background-color: #1a252f; 
+      font-weight: bold; 
+      font-size: 1.2em; 
+      color: #f1c40f;
+    }
+    .menu { 
+      list-style: none; 
+      padding: 0; 
+      margin: 0; 
+      width: 100%; 
+    }
+    .menu a { 
+      display: block; 
+      padding: 15px 20px; 
+      color: #ecf0f1; 
+      text-decoration: none; 
+      border-bottom: 1px solid #34495e; 
+      transition: background 0.3s; 
+    }
+    .menu a:hover { 
+      background-color: #34495e; 
+      border-left: 4px solid #f1c40f;
+    }
+    
+    /* Submenu Styles */
+    .submenu { 
+      display: none; 
+      background-color: #243342; 
+      list-style: none; 
+      padding: 0; 
+    }
+    .submenu a { 
+      padding-left: 40px; 
+      border-bottom: none; 
+      font-size: 0.9em; 
+    }
+    .submenu a:hover { 
+      background-color: #1a252f; 
+    }
+    .has-submenu:hover .submenu { 
+      display: block; 
+    }
+    
+    /* Main Content & Iframe Styles */
+    #main-content { 
+      flex-grow: 1; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .topbar { 
+      background-color: #ffffff; 
+      padding: 20px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+      text-align: center; 
+      font-size: 1.5em; 
+      color: #2c3e50; 
+      font-weight: bold; 
+    }
+    #iframe-container { 
+      flex-grow: 1; 
+      padding: 15px; 
+    }
+    iframe { 
+      width: 100%; 
+      height: 100%; 
+      border: none; 
+      background-color: white; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Menu -->
+  <div id="sidebar">
+    <div class="header">Sub Treasury<br>Vanchiyoor</div>
+    <ul class="menu">
+      <li><a href="https://itcelldto.github.io/try/login.html" target="contentFrame">Home</a></li>
+      
+      <!-- Services with Submenus -->
+      <li class="has-submenu">
+        <a href="#">Services &#9662;</a>
+        <ul class="submenu">
+          <li><a href="https://script.google.com/macros/s/AKfycbwhJxqW4wfNnn4luZt_SLt_GbVgz3ALCsclMDkEfA3DeWq8IkdCOnQZJqX2LPxEgJO0/exec" target="contentFrame">DDO Search</a></li>
+          <li><a href="https://spark.gov.in" target="contentFrame">SPARK (Salary)</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycby8NEXUVygvzrlHL2w7fZoRJn8xdslnFQruCXeuldzfji7c-sHMbs3a7Rs8opiFv6NjwA/exec" target="contentFrame">Challan To Bank Register</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbwZ6dMep50nAK16AFTOBVqQvlRtL5tQi9Cq1Jlk51B1iVrEI_U4WbzSaMG2jyITFZSa/exec" target="contentFrame">Pension Book Register</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbwyB-J4aEqgDscLWPuaiaZkrf2aUrmLSuZnI-5dOHOTszgRugeGDPY1DF4-D5nDF7Pq/exec" target="contentFrame">KYC Store</a></li>
+      
+        </ul>
+      </li>
+            <!-- Reports with Submenus -->
+      <li class="has-submenu">
+        <a href="#">AST Tools &#9662;</a>
+        <ul class="submenu">
+         <li><a href="https://script.google.com/macros/s/AKfycbx7N4XWFquy7T8-jJV6tLNJ4akxAFksvq6APchS7O7ZZgahR6-pIhXo4jIUAhw5Ke8R/exec" target="contentFrame">CSV ഡാറ്റ അപ്‌ലോഡർ</a></li>
+           <li><a href="https://docs.google.com/spreadsheets/d/1gyoRP2zhqRHQjJ7L58dfWdib9q0HqHybQHTC5EvLenk/edit?gid=0#gid=0" target="contentFrame">CSV ഡാറ്റ Output Sheet</a></li>
+        </ul>
+      </li>
+      
+      <!-- Reports with Submenus -->
+      <li class="has-submenu">
+        <a href="#">DT Dashboard & Links &#9662;</a>
+        <ul class="submenu">
+          <li><a href="https://docs.google.com/spreadsheets/d/1V1AX6rOP1esXjO9AK6h3D1fMITIaw5ep94exAb_0FHg/edit?gid=0#gid=0" target="contentFrame">Dashboard</a></li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1V1AX6rOP1esXjO9AK6h3D1fMITIaw5ep94exAb_0FHg/edit?gid=288782367#gid=288782367" target="contentFrame">DT Links</a></li>
+        </ul>
+      </li>
+
+
+      <li><a href="https://itcelldto.github.io/try/login.html" target="contentFrame">DT IT Cell</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content Area -->
+  <div id="main-content">
+    <div class="topbar">Additional Sub Treasury Vanchiyoor - Dashboard</div>
+    <div id="iframe-container">
+      <!-- target="contentFrame" എന്ന പേരിൽ ക്ലിക്ക് ചെയ്യുന്ന ലിങ്കുകൾ ഇവിടെ തുറക്കും -->
+      <iframe name="contentFrame" src="https://itcelldto.github.io/try/login.html"></iframe>
+    </div>
+  </div>
+
+</body>
+</html>
