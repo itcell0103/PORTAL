@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --group1-color: #4a90e2;
+            --group1-hover: #357abd;
+            --group2-color: #2ecc71;
+            --group2-hover: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #2c3e50;
+        }
+
+        header p {
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+            color: #34495e;
+        }
+
+        /* Grid Layout for Box Buttons */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        /* Base Box Button Styling */
+        .box-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .box-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .box-btn span {
+            font-size: 0.8rem;
+            font-weight: normal;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Group 1 Styles (Open in New Tab) */
+        .group-new-tab {
+            background-color: var(--group1-color);
+        }
+
+        .group-new-tab:hover {
+            background-color: var(--group1-hover);
+        }
+
+        /* Group 2 Styles (Open in Same Tab) */
+        .group-same-tab {
+            background-color: var(--group2-color);
+        }
+
+        .group-same-tab:hover {
+            background-color: var(--group2-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Welcome Back</h1>
+        <p>Select a destination below to get started</p>
+    </header>
+
+    <div class="container">
+
+        <h2 class="section-title">External Resources (Opens in New Tab)</h2>
+        <div class="grid-container">
+            <a href="http://coretis.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                CoreTIS
+                <span>Opens external site ↗</span>
+            <a href="http://coretis.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                CoreTIS
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="http://tsb.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                TSB
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="http://iams.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                Iams
+                <span>Opens external site ↗</span>
+            </a>
+        </div>
+
+        <h2 class="section-title">Internal Navigation (Opens in Same Tab)</h2>
+        <div class="grid-container">
+            <a href="#dashboard" class="box-btn group-same-tab">
+                Dashboard
+                <span>Stay on this site</span>
+            </a>
+            <a href="#profile" class="box-btn group-same-tab">
+                User Profile
+                <span>Stay on this site</span>
+            </a>
+            <a href="#settings" class="box-btn group-same-tab">
+                Settings
+                <span>Stay on this site</span>
+            </a>
+            <a href="#help" class="box-btn group-same-tab">
+                Help & Support
+                <span>Stay on this site</span>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>
