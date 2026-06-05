@@ -14,6 +14,9 @@
       --text-main: #334155;
       --group-new-tab: #f43f5e;
       --group-new-tab-hover: #e11d48;
+      /* Added custom variables for the Other Sites group */
+      --group-other-sites: #32a8a4;
+      --group-other-sites-hover: #26827f;
       --group-iframe: #0ea5e9;
       --group-iframe-hover: #0284c7;
       --border-color: #e2e8f0;
@@ -177,6 +180,10 @@
     .group-new-tab { background-color: var(--group-new-tab); }
     .group-new-tab:hover { background-color: var(--group-new-tab-hover); }
 
+    /* Custom classes for the new teal color scheme */
+    .group-other-sites { background-color: var(--group-other-sites); }
+    .group-other-sites:hover { background-color: var(--group-other-sites-hover); }
+
     /* Iframe Wrapper styling */
     #iframe-wrapper {
       flex-grow: 1;
@@ -201,7 +208,7 @@
     <div class="header">Sub Treasury<br>Vanchiyoor</div>
     <ul class="menu">
       <li><a href="javascript:void(0);" onclick="showDashboard()">Home Dashboard</a></li>
-      
+       
       <li class="has-submenu">
         <a href="#">Services &#9662;</a>
         <ul class="submenu">
@@ -220,7 +227,7 @@
           <li><a href="https://docs.google.com/spreadsheets/d/1gyoRP2zhqRHQjJ7L58dfWdib9q0HqHybQHTC5EvLenk/edit?gid=0#gid=0" target="contentFrame" onclick="showIframe()">CSV ഡാറ്റ Output Sheet</a></li>
         </ul>
       </li>
-      
+       
       <li class="has-submenu">
         <a href="#">DT Dashboard & Links &#9662;</a>
         <ul class="submenu">
@@ -243,9 +250,9 @@
 
   <div id="main-content">
     <div class="topbar">Additional Sub Treasury Vanchiyoor - Dashboard</div>
-    
+     
     <div id="quick-dashboard" class="dashboard-grid-container">
-      
+       
         <h2 class="section-title">Treasury Sites (Opens in New Tab)</h2>
         <div class="grid-container">
             <a href="http://coretis.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
@@ -272,19 +279,19 @@
 
         <h2 class="section-title">Other Sites (Opens in New Tab)</h2>
         <div class="grid-container">
-            <a href="https://mail.google.com/mail" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+            <a href="https://mail.google.com/mail" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
                 Gmail
                 <span>Opens external site ↗</span>
             </a>
-            <a href="https://cra.nps-proteantech.in/CRA//" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+            <a href="https://cra.nps-proteantech.in/CRA//" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
                 NPSCAN CRA Single-Window
                 <span>Opens external site ↗</span>
             </a>
-            <a href="https://cra.nps-proteantech.in/CRA/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+            <a href="https://cra.nps-proteantech.in/CRA/" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
                 CRA NSDL Double-Window
                 <span>Opens external site ↗</span>
             </a>
-            <a href="https://etreasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+            <a href="https://etreasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
                 eTreasury
                 <span>Opens external site ↗</span>
             </a>
