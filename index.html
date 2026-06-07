@@ -158,6 +158,7 @@
       margin: 0 auto;
       width: 100%;
       box-sizing: border-box;
+      flex-grow: 1; /* Pushes footer down when content is sparse */
     }
     .section-title {
       font-size: 1.2rem;
@@ -235,6 +236,41 @@
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); 
     }
 
+    /* Modern Portal Footer Styling */
+    .portal-footer {
+      background-color: var(--sidebar-bg);
+      color: #94a3b8;
+      padding: 20px 40px;
+      border-top: 3px solid var(--accent-color);
+      font-size: 0.9rem;
+      margin-top: auto; /* Ensures footer sticks to layout bottom */
+    }
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .footer-left {
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .footer-left span {
+      color: #f8fafc;
+    }
+    .footer-right {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 768px) {
       #sidebar {
@@ -274,6 +310,13 @@
       }
       .has-submenu:focus-within .submenu {
         display: block;
+      }
+      .portal-footer {
+        padding: 20px;
+      }
+      .footer-container {
+        flex-direction: column;
+        text-align: center;
       }
     }
   </style>
@@ -403,12 +446,23 @@
                 <span>Opens external site ↗</span>
             </a>
         </div>
-
     </div>
 
     <div id="iframe-wrapper">
       <iframe name="contentFrame" src="https://script.google.com/macros/s/AKfycbw4hro0UwrCxmrecma_1ScKLXc3UZgoQnqCD202lUogA7npk0g0NHr9fn16bknUMwgvhw/exec"></iframe>
     </div>
+
+    <!-- Enhanced Modern Footer Element -->
+    <footer class="portal-footer">
+      <div class="footer-container">
+        <div class="footer-left">
+          &copy; 2026-27 <span>Additional Sub Treasury Vanchiyoor</span>. All Rights Reserved.
+        </div>
+        <div class="footer-right">
+          Powered by Jasif A :: Admin. AST Vanchiyoor 
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script>
