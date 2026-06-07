@@ -14,7 +14,11 @@
       --text-main: #334155;
       --group-new-tab: #f43f5e;
       --group-new-tab-hover: #e11d48;
-      /* Added custom variables for the Other Sites group */
+      
+      /* Treasury Tools Color Variables */
+      --group-same-tab: #1bd6f7;
+      --group-same-tab-hover: #11bedd;
+      
       --group-other-sites: #32a8a4;
       --group-other-sites-hover: #26827f;
       --group-iframe: #0ea5e9;
@@ -42,7 +46,8 @@
       flex-direction: column; 
       box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
       flex-shrink: 0;
-      z-index: 10;
+      z-index: 100;
+      transition: transform 0.3s ease;
     }
     .header { 
       padding: 30px 24px; 
@@ -107,17 +112,43 @@
       flex-direction: column; 
       height: 100%;
       overflow-y: auto;
+      position: relative;
     }
     .topbar { 
       background-color: #ffffff; 
       padding: 20px 40px; 
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+      display: flex;
+      align-items: center;
       text-align: left; 
       font-size: 1.4em; 
       color: var(--sidebar-header); 
       font-weight: 700; 
       letter-spacing: -0.3px;
       border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Mobile Hamburger Button */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--sidebar-header);
+      cursor: pointer;
+      margin-right: 15px;
+    }
+
+    /* Sidebar Overlay for Mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 90;
     }
 
     /* Grid Dashboard Styles */
@@ -179,8 +210,10 @@
     /* Button Colors */
     .group-new-tab { background-color: var(--group-new-tab); }
     .group-new-tab:hover { background-color: var(--group-new-tab-hover); }
+    
+    .group-same-tab { background-color: var(--group-same-tab); }
+    .group-same-tab:hover { background-color: var(--group-same-tab-hover); }
 
-    /* Custom classes for the new teal color scheme */
     .group-other-sites { background-color: var(--group-other-sites); }
     .group-other-sites:hover { background-color: var(--group-other-sites-hover); }
 
@@ -191,6 +224,7 @@
       display: none; 
       height: 100%;
       background-color: #f1f5f9;
+      box-sizing: border-box;
     }
     iframe { 
       width: 100%; 
@@ -200,9 +234,53 @@
       border-radius: 12px; 
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); 
     }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      #sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      .menu-toggle {
+        display: inline-block;
+      }
+      .topbar {
+        padding: 15px 20px;
+        font-size: 1.1em;
+      }
+      .dashboard-grid-container {
+        padding: 20px;
+      }
+      .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      .box-btn {
+        height: 110px;
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+      #iframe-wrapper {
+        padding: 10px;
+      }
+      .has-submenu:focus-within .submenu {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <div id="sidebar">
     <div class="header">Sub Treasury<br>Vanchiyoor</div>
@@ -223,7 +301,7 @@
         <a href="#">AST Tools &#9662;</a>
         <ul class="submenu">
           <li><a href="https://script.google.com/macros/s/AKfycbyJhSte9348nJP7IAd5fiWD4x5BbD9YG76G88jhZEo3Pt6FJxr087I9L0VQydL4ZnI_/exec" target="contentFrame" onclick="showIframe()">File DropBox</a></li>
-          <li><a href="https://script.google.com/macros/s/AKfycbzyarGFupmjHfSrqzmi_8NjALSWm3juB9vXsuZ_75rhltqhD_Q3s39dxonCbVtaJrgG/exec" target="contentFrame" onclick="showIframe()">AST Doc-Scan</a></li>        
+          <li><a href="https://script.google.com/macros/s/AKfycbyM3-YapeI8s6wvTwI7GOyRBJ1EgKIU-zFReLH3Z0tarwRtMbXlU7_ySk3zuNlmysG8JQ/exec" target="contentFrame" onclick="showIframe()">AST Doc-Scan</a></li>        
           <li><a href="https://script.google.com/macros/s/AKfycbzDCu-2b_CvNZzrkjnDgoD7R50aI0OIF24u-pVNZggvaABbJB-wf8s70956W6Lv22ID/exec" target="contentFrame" onclick="showIframe()">Form 16/16A</a></li>
           <li><a href="https://script.google.com/macros/s/AKfycbx7N4XWFquy7T8-jJV6tLNJ4akxAFksvq6APchS7O7ZZgahR6-pIhXo4jIUAhw5Ke8R/exec" target="contentFrame" onclick="showIframe()">CSV ഡാറ്റ അപ്‌ലോഡർ</a></li>
           <li><a href="https://docs.google.com/spreadsheets/d/1gyoRP2zhqRHQjJ7L58dfWdib9q0HqHybQHTC5EvLenk/edit?gid=0#gid=0" target="contentFrame" onclick="showIframe()">CSV ഡാറ്റ Output Sheet</a></li>
@@ -251,7 +329,10 @@
   </div>
 
   <div id="main-content">
-    <div class="topbar">Additional Sub Treasury Vanchiyoor - Dashboard</div>
+    <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">&#9776;</button>
+      <span>Additional Sub Treasury Vanchiyoor - Dashboard</span>
+    </div>
      
     <div id="quick-dashboard" class="dashboard-grid-container">
        
@@ -274,36 +355,31 @@
                 <span>Opens external site ↗</span>
             </a>
             <a href="http://iams.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
-                iAMS
+                IAMS
                 <span>Opens external site ↗</span>
-            </a>
             </a>
             <a href="http://umas.2.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
                 UMAS
                 <span>Opens external site ↗</span>
             </a>
-            <a href="https://eofficetreasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
-                eOffice
-                <span>Opens external site ↗</span>
+        </div>
+
+        <h2 class="section-title">Treasury Tools (Opens in Iframe)</h2>
+        <div class="grid-container">
+            <a href="https://script.google.com/macros/s/AKfycbyJhSte9348nJP7IAd5fiWD4x5BbD9YG76G88jhZEo3Pt6FJxr087I9L0VQydL4ZnI_/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                File DropBox
+                <span>Opens in frame ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbzyarGFupmjHfSrqzmi_8NjALSWm3juB9vXsuZ_75rhltqhD_Q3s39dxonCbVtaJrgG/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                AST Doc-Scan
+                <span>Opens in frame ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbzDCu-2b_CvNZzrkjnDgoD7R50aI0OIF24u-pVNZggvaABbJB-wf8s70956W6Lv22ID/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                Form 16/16A
+                <span>Opens in frame ↓</span>
             </a>
         </div>
 
-      <h2 class="section-title">Treasury Tools (Opens in Same Tab)</h2>
-        <div class="grid-container">
-            <a href="https://script.google.com/macros/s/AKfycbyJhSte9348nJP7IAd5fiWD4x5BbD9YG76G88jhZEo3Pt6FJxr087I9L0VQydL4ZnI_/exec" target="_self" class="box-btn group-same-tab">
-                File DropBox
-                <span>Opens in same tab ↴</span>
-            </a>
-            <a href="https://script.google.com/macros/s/AKfycbzyarGFupmjHfSrqzmi_8NjALSWm3juB9vXsuZ_75rhltqhD_Q3s39dxonCbVtaJrgG/exec" target="_self" class="box-btn group-same-tab">
-                AST Doc-Scan
-                <span>Opens in same tab ↴</span>
-            </a>
-            <a href="https://script.google.com/macros/s/AKfycbzDCu-2b_CvNZzrkjnDgoD7R50aI0OIF24u-pVNZggvaABbJB-wf8s70956W6Lv22ID/exec" target="_self" class="box-btn group-same-tab">
-                Form 16/16A
-                <span>Opens in same tab ↴</span>
-            </a>
-        </div>
-      
         <h2 class="section-title">Other Sites (Opens in New Tab)</h2>
         <div class="grid-container">
             <a href="https://mail.google.com/mail" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
@@ -338,15 +414,26 @@
   <script>
     const dashboard = document.getElementById('quick-dashboard');
     const iframeWrapper = document.getElementById('iframe-wrapper');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
 
     function showIframe() {
       dashboard.style.display = 'none';
       iframeWrapper.style.display = 'block';
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
     }
 
     function showDashboard() {
       iframeWrapper.style.display = 'none';
       dashboard.style.display = 'block';
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
     }
   </script>
 
