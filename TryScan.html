@@ -1,69 +1,506 @@
-// Code.gs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Document Scanner Enterprise</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <style>
+    body { background-color: #f1f3f5; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 40px; }
+    .editor-container { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e3e6ec; }
+    .thumbnail-card { width: 105px; cursor: pointer; position: relative; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; transition: all 0.2s; }
+    .thumbnail-card.active { border-color: #0d6efd; box-shadow: 0 0 10px rgba(13,110,253,0.25); transform: scale(1.02); }
+    .thumbnail-card img { width: 100%; height: 120px; object-fit: contain; background: #f8f9fa; border-radius: 6px; }
+    .badge-num { position: absolute; top: -5px; left: -5px; font-size: 0.75rem; border-radius: 50%; padding: 4px 7px; }
+    .canvas-wrapper { background: #212529; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: auto; min-height: 480px; box-shadow: inset 0 0 20px rgba(0,0,0,0.4); }
+    .control-label { font-size: 0.85rem; font-weight: 600; color: #495057; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .section-title { font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; border-bottom: 2px solid #f1f3f5; padding-bottom: 6px; margin-bottom: 12px; }
+    .bottom-panel { background: #fff; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.08); border: 1px solid #e3e6ec; }
+  </style>
+</head>
+<body>
 
-function doGet() {
-  return HtmlService.createTemplateFromFile('Index')
-    .evaluate()
-    .setTitle('AI Document Scanner Enterprise')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
-}
-
-// Global Folder configuration
-var TARGET_FOLDER_ID = "1gl5O45EM7mgpGMaSK3vhXakWEinQcmK8";
-
-function savePdfToDrive(base64Data, fileName) {
-  try {
-    var folder = DriveApp.getFolderById(TARGET_FOLDER_ID);
-    var cleanBase64 = base64Data.indexOf(',') > -1 ? base64Data.split(',')[1] : base64Data;
-    var blob = Utilities.newBlob(Utilities.base64Decode(cleanBase64), 'application/pdf', fileName + '.pdf');
-    var file = folder.createFile(blob);
+<div class="container-fluid py-4">
+  <div class="row g-4 mb-4">
     
-    return { 
-      status: 'success', 
-      id: file.getId(),
-      url: file.getUrl(),
-      fileName: fileName + '.pdf'
-    };
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+    <div class="col-lg-3">
+      <div class="editor-container p-3 h-100">
+        <h5 class="fw-bold mb-3 d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-files me-2 text-primary"></i>Pages</span>
+          <span class="badge bg-primary rounded-pill" id="pageCount">0</span>
+        </h5>
+        
+        <div class="mb-3">
+          <label class="btn btn-outline-primary btn-sm w-100 py-2 fw-semibold">
+            <i class="bi bi-camera-fill me-2"></i>Capture / Add Images
+            <input type="file" id="imageFiles" accept="image/*" multiple capture="environment" style="display: none;">
+          </label>
+        </div>
 
-/**
- * FEATURE: Delete a specific file from Google Drive
- */
-function deleteFileFromDrive(fileId) {
-  try {
-    var file = DriveApp.getFileById(fileId);
-    file.setTrashed(true); // Safely moves file to trash
-    return { status: 'success' };
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+        <div class="d-flex gap-2 mb-3">
+          <button class="btn btn-light btn-sm flex-grow-1 border" id="moveUpBtn"><i class="bi bi-arrow-up me-1"></i>Up</button>
+          <button class="btn btn-light btn-sm flex-grow-1 border" id="moveDownBtn"><i class="bi bi-arrow-down me-1"></i>Down</button>
+        </div>
 
-/**
- * FEATURE: Fetch the latest 5 files matching 'AST-' prefix from the Drive folder
- */
-function fetchLatestFilesFromDrive() {
-  try {
-    var folder = DriveApp.getFolderById(TARGET_FOLDER_ID);
-    // Sorts files by most recently updated
-    var files = folder.getFiles();
-    var fileList = [];
-    
-    while (files.hasNext() && fileList.length < 5) {
-      var file = files.next();
-      if (file.getName().indexOf('AST-') === 0) {
-        fileList.push({
-          id: file.getId(),
-          name: file.getName(),
-          url: file.getUrl(),
-          timestamp: Utilities.formatDate(file.getLastUpdated(), Session.getScriptTimeZone(), "hh:mm:ss a")
-        });
-      }
+        <div id="thumbnailContainer" class="d-flex flex-row flex-lg-column gap-3 overflow-auto pb-2" style="max-height: 380px;">
+          </div>
+        
+        <hr>
+        <button class="btn btn-outline-danger btn-sm w-100" id="deletePageBtn"><i class="bi bi-trash3-fill me-2"></i>Delete Active Page</button>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="editor-container p-3 text-center h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small fw-medium"><i class="bi bi-bounding-box me-1"></i>Workspace Viewport</span>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-dark active" id="orientPortrait"><i class="bi bi-file-earmark me-1"></i>A4 Vert</button>
+            <button class="btn btn-outline-dark" id="orientLandscape"><i class="bi bi-file-earmark-landscape me-1"></i>A4 Horiz</button>
+          </div>
+        </div>
+        
+        <div class="canvas-wrapper">
+          <canvas id="editorCanvas"></canvas>
+        </div>
+        
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-secondary btn-sm" id="rotateLeft90"><i class="bi bi-arrow-counterclockwise me-1"></i>Rotate -90°</button>
+          <button class="btn btn-secondary btn-sm" id="rotateRight90"><i class="bi bi-arrow-clockwise me-1"></i>Rotate +90°</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3">
+      <div class="editor-container p-3 h-100">
+        <div class="section-title"><i class="bi bi-magic me-1"></i>AI Intelligent Fixes</div>
+        <div class="row g-2 mb-4">
+          <div class="col-6">
+            <button class="btn btn-primary btn-sm w-100 py-2 fw-semibold" id="autoCropBtn"><i class="bi bi-crop d-block mb-1 fs-5"></i>Auto Crop</button>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-success btn-sm w-100 py-2 fw-semibold" id="autoColorBtn"><i class="bi bi-sun-fill d-block mb-1 fs-5"></i>Auto Color</button>
+          </div>
+        </div>
+
+        <div class="section-title"><i class="bi bi-sliders2-vertical me-1"></i>Geometry & Slant</div>
+        <div class="mb-3">
+          <label class="control-label">Fine Slant / Tilt / Angle <span id="val-angle">0°</span></label>
+          <input type="range" class="form-range geometry-slider" id="angleSlider" min="-45" max="45" step="1" value="0">
+        </div>
+        <div class="mb-4">
+          <label class="control-label">Skew / Inclination X <span id="val-skewX">0</span></label>
+          <input type="range" class="form-range geometry-slider" id="skewX" min="-30" max="30" step="1" value="0">
+        </div>
+
+        <div class="section-title"><i class="bi bi-sliders me-1"></i>Manual Lighting & Tone</div>
+        <div class="mb-2"><label class="control-label">Brightness <span id="val-brightness">0</span></label><input type="range" class="form-range filter-slider" id="brightness" min="-0.8" max="0.8" step="0.05" value="0"></div>
+        <div class="mb-2"><label class="control-label">Dark-Area Contrast <span id="val-contrast">0</span></label><input type="range" class="form-range filter-slider" id="contrast" min="-0.8" max="0.8" step="0.05" value="0"></div>
+        <div class="mb-2"><label class="control-label">Saturation <span id="val-saturation">0</span></label><input type="range" class="form-range filter-slider" id="saturation" min="-1" max="1" step="0.05" value="0"></div>
+        <div class="mb-3"><label class="control-label">Hue Rotation <span id="val-hue">0</span></label><input type="range" class="form-range filter-slider" id="hue" min="-1" max="1" step="0.05" value="0"></div>
+
+        <div class="form-check form-switch mb-2"><input class="form-check-input filter-checkbox" type="checkbox" id="sharpnessToggle"><label class="form-check-label fw-medium text-dark small" for="sharpnessToggle"><i class="bi bi-lightning-fill text-warning me-1"></i>High Sharpness</label></div>
+        <div class="form-check form-switch mb-4"><input class="form-check-input filter-checkbox" type="checkbox" id="highlightToggle"><label class="form-check-label fw-medium text-dark small" for="highlightToggle"><i class="bi bi-file-binary-fill text-info me-1"></i>Doc Highlight (B&W)</label></div>
+
+        <div class="section-title"><i class="bi bi-cloud-arrow-up-fill me-1"></i>Export Profile</div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Filename Generation Format</label>
+          <input type="text" class="form-control form-control-sm text-center fw-bold bg-light" value="AST-DDMMYY-HHMMSS" disabled>
+        </div>
+        <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" id="savePdfBtn"><i class="bi bi-check-circle-fill me-2"></i>Compile & Save PDF</button>
+        <div id="statusContainer" class="mt-2 text-center d-none"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div><span class="small text-muted fw-medium">Uploading compilation sequence...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="bottom-panel p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold m-0 text-dark">
+            <i class="bi bi-cloud-check-fill text-success me-2"></i>Processed Files Archive (Last 5 Items)
+          </h5>
+          <button class="btn btn-primary btn-sm fw-semibold shadow-sm" id="reloadDriveBtn" title="Query target directory records">
+            <i class="bi bi-arrow-clockwise me-1" id="reloadIcon"></i> Reload Folder Drive Sync
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle border m-0" style="background:#fdfdfd;">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 50%;">File Name</th>
+                <th style="width: 20%;">Processed Stamp</th>
+                <th style="width: 25%;" class="text-center">Available Actions</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">No cached operations trace detected. Click 'Reload Folder Drive Sync' above to fetch items.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const { jsPDF } = window.jspdf;
+  let pagesArray = [];
+  let activeIndex = -1;
+  
+  let canvasWidth = 440;
+  let canvasHeight = 622;
+
+  const canvas = new fabric.Canvas('editorCanvas', {
+    width: canvasWidth,
+    height: canvasHeight,
+    backgroundColor: '#ffffff'
+  });
+
+  // UI Standard Actions Core Mapping Bindings
+  document.getElementById('imageFiles').addEventListener('change', handleFileImport);
+  document.getElementById('moveUpBtn').addEventListener('click', () => reorderPage(-1));
+  document.getElementById('moveDownBtn').addEventListener('click', () => reorderPage(1));
+  document.getElementById('deletePageBtn').addEventListener('click', deleteActivePage);
+  document.getElementById('orientPortrait').addEventListener('click', () => changeOrientation('portrait'));
+  document.getElementById('orientLandscape').addEventListener('click', () => changeOrientation('landscape'));
+  document.getElementById('rotateLeft90').addEventListener('click', () => stepRotate(-90));
+  document.getElementById('rotateRight90').addEventListener('click', () => stepRotate(90));
+  
+  document.getElementById('autoCropBtn').addEventListener('click', executeAutoCrop);
+  document.getElementById('autoColorBtn').addEventListener('click', executeAutoColor);
+  document.getElementById('savePdfBtn').addEventListener('click', compileAndUploadPDF);
+  
+  // Connect New Bottom Panel Trigger Handles
+  document.getElementById('reloadDriveBtn').addEventListener('click', syncWithDriveFolderContents);
+
+  // Auto Boot Load Lifecycle hook
+  window.addEventListener('DOMContentLoaded', () => {
+    syncWithDriveFolderContents();
+  });
+
+  // Fabric Image Controls Selection Updates Hooks
+  canvas.on('selection:created', updateSlidersFromSelection);
+  canvas.on('selection:updated', updateSlidersFromSelection);
+
+  function updateSlidersFromSelection(e) {
+    const obj = e.selected[0];
+    if (obj && obj.type === 'image') {
+      document.getElementById('angleSlider').value = Math.round(obj.angle || 0);
+      document.getElementById('val-angle').innerText = `${Math.round(obj.angle || 0)}°`;
+      document.getElementById('skewX').value = Math.round(obj.skewX || 0);
+      document.getElementById('val-skewX').innerText = Math.round(obj.skewX || 0);
     }
-    return { status: 'success', files: fileList };
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
   }
-}
+
+  // Geometry alignment configuration loops
+  document.getElementById('angleSlider').addEventListener('input', (e) => {
+    document.getElementById('val-angle').innerText = `${e.target.value}°`;
+    const activeObj = canvas.getActiveObject();
+    if (activeObj) { activeObj.set('angle', parseFloat(e.target.value)); canvas.renderAll(); }
+  });
+  document.getElementById('skewX').addEventListener('input', (e) => {
+    document.getElementById('val-skewX').innerText = e.target.value;
+    const activeObj = canvas.getActiveObject();
+    if (activeObj) { activeObj.set('skewX', parseInt(e.target.value)); canvas.renderAll(); }
+  });
+
+  // Range slider adjustments processing bindings loops
+  document.querySelectorAll('.filter-slider').forEach(slider => {
+    slider.addEventListener('input', (e) => {
+      document.getElementById(`val-${e.target.id}`).innerText = e.target.value;
+      applyLiveFilters();
+    });
+  });
+  document.querySelectorAll('.filter-checkbox').forEach(box => {
+    box.addEventListener('change', applyLiveFilters);
+  });
+
+  // Time stamp file name construction routine matrix output framework string
+  function getTimestampFilename() {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `AST-${pad(now.getDate())}${pad(now.getMonth() + 1)}${String(now.getFullYear()).slice(-2)}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  }
+
+  function handleFileImport(e) {
+    const files = Array.from(e.target.files);
+    let loadedCount = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        pagesArray.push({
+          imgSrc: event.target.result,
+          orientation: 'portrait',
+          filters: { brightness: 0, contrast: 0, saturation: 0, hue: 0, sharp: false, highlight: false }
+        });
+        loadedCount++;
+        if (loadedCount === files.length) { renderThumbnails(); selectPage(pagesArray.length - files.length); }
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  }
+
+  function renderThumbnails() {
+    const container = document.getElementById('thumbnailContainer');
+    container.innerHTML = '';
+    document.getElementById('pageCount').innerText = pagesArray.length;
+    pagesArray.forEach((page, index) => {
+      const card = document.createElement('div');
+      card.className = `thumbnail-card p-1 ${index === activeIndex ? 'active' : ''}`;
+      card.onclick = () => selectPage(index);
+      card.innerHTML = `<span class="badge bg-dark badge-num">${index + 1}</span><img src="${page.imgSrc}"><div class="text-center small mt-1 text-truncate fw-bold text-muted" style="font-size:0.7rem;">${page.orientation === 'portrait' ? 'A4 Vertical' : 'A4 Horiz'}</div>`;
+      container.appendChild(card);
+    });
+  }
+
+  function selectPage(index) {
+    if (index < 0 || index >= pagesArray.length) return;
+    activeIndex = index;
+    renderThumbnails();
+    const page = pagesArray[activeIndex];
+    
+    document.getElementById('brightness').value = page.filters.brightness;
+    document.getElementById('val-brightness').innerText = page.filters.brightness;
+    document.getElementById('contrast').value = page.filters.contrast;
+    document.getElementById('val-contrast').innerText = page.filters.contrast;
+    document.getElementById('saturation').value = page.filters.saturation;
+    document.getElementById('val-saturation').innerText = page.filters.saturation;
+    document.getElementById('hue').value = page.filters.hue;
+    document.getElementById('val-hue').innerText = page.filters.hue;
+    document.getElementById('sharpnessToggle').checked = page.filters.sharp;
+    document.getElementById('highlightToggle').checked = page.filters.highlight;
+
+    setCanvasOrientationLayout(page.orientation);
+    
+    fabric.Image.fromURL(page.imgSrc, function(img) {
+      canvas.clear();
+      canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
+      img.scaleToWidth(canvas.width * 0.95);
+      img.set({ left: canvas.width / 2, top: canvas.height / 2, originX: 'center', originY: 'center', cornerColor: '#0d6efd', borderColor: '#0d6efd', cornerSize: 9, transparentCorners: false });
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      applyLiveFilters();
+    });
+  }
+
+  function setCanvasOrientationLayout(mode) {
+    if (mode === 'portrait') { canvas.setDimensions({ width: 440, height: 622 }); } 
+    else { canvas.setDimensions({ width: 622, height: 440 }); }
+    pagesArray[activeIndex].orientation = mode;
+    document.getElementById('orientPortrait').classList.toggle('active', mode === 'portrait');
+    document.getElementById('orientLandscape').classList.toggle('active', mode === 'landscape');
+  }
+
+  function changeOrientation(mode) {
+    if (activeIndex === -1) return;
+    setCanvasOrientationLayout(mode);
+    renderThumbnails();
+    const activeObj = canvas.getActiveObject();
+    if (activeObj) { activeObj.set({ left: canvas.width / 2, top: canvas.height / 2 }); canvas.renderAll(); }
+  }
+
+  function stepRotate(deg) {
+    const activeObj = canvas.getActiveObject();
+    if (!activeObj) return;
+    let nextAngle = ((activeObj.get('angle') || 0) + deg) % 360;
+    activeObj.set('angle', nextAngle);
+    document.getElementById('angleSlider').value = nextAngle;
+    document.getElementById('val-angle').innerText = `${nextAngle}°`;
+    canvas.renderAll();
+  }
+
+  function executeAutoCrop() {
+    const activeObj = canvas.getActiveObject();
+    if (!activeObj || activeObj.type !== 'image') return;
+    const nativeImgEl = activeObj._element;
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    tempCanvas.width = nativeImgEl.width;
+    tempCanvas.height = nativeImgEl.height;
+    ctx.drawImage(nativeImgEl, 0, 0);
+
+    try {
+      const imgData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+      const data = imgData.data;
+      let minX = tempCanvas.width, maxX = 0, minY = tempCanvas.height, maxY = 0;
+      for (let y = 0; y < tempCanvas.height; y += 4) {
+        for (let x = 0; x < tempCanvas.width; x += 4) {
+          let idx = (y * tempCanvas.width + x) * 4;
+          if ((0.299*data[idx] + 0.587*data[idx+1] + 0.114*data[idx+2]) < 130) {
+            if (x < minX) minX = x; if (x > maxX) maxX = x;
+            if (y < minY) minY = y; if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (maxX <= minX || maxY <= minY) return;
+      let p = 15;
+      activeObj.set({ cropX: Math.max(0, minX - p), cropY: Math.max(0, minY - p), width: Math.min(tempCanvas.width, maxX + p) - Math.max(0, minX - p), height: Math.min(tempCanvas.height, maxY + p) - Math.max(0, minY - p) });
+      activeObj.scaleToWidth(canvas.width * 0.95);
+      activeObj.set({ left: canvas.width / 2, top: canvas.height / 2 });
+      canvas.renderAll();
+    } catch (e) { alert("Matrix process access violation profile restriction."); }
+  }
+
+  function executeAutoColor() {
+    document.getElementById('brightness').value = 0.05; document.getElementById('val-brightness').innerText = "0.05";
+    document.getElementById('contrast').value = 0.25; document.getElementById('val-contrast').innerText = "0.25";
+    document.getElementById('saturation').value = 0.15; document.getElementById('val-saturation').innerText = "0.15";
+    document.getElementById('sharpnessToggle').checked = true;
+    applyLiveFilters();
+  }
+
+  function applyLiveFilters() {
+    const activeObj = canvas.getActiveObject();
+    if (!activeObj || activeObj.type !== 'image') return;
+    const config = {
+      brightness: parseFloat(document.getElementById('brightness').value),
+      contrast: parseFloat(document.getElementById('contrast').value),
+      saturation: parseFloat(document.getElementById('saturation').value),
+      hue: parseFloat(document.getElementById('hue').value),
+      sharp: document.getElementById('sharpnessToggle').checked,
+      highlight: document.getElementById('highlightToggle').checked
+    };
+    pagesArray[activeIndex].filters = config;
+    activeObj.filters = [];
+    if (config.brightness !== 0) activeObj.filters.push(new fabric.Image.filters.Brightness({ brightness: config.brightness }));
+    if (config.contrast !== 0) activeObj.filters.push(new fabric.Image.filters.Contrast({ contrast: config.contrast }));
+    if (config.saturation !== 0) activeObj.filters.push(new fabric.Image.filters.Saturation({ saturation: config.saturation }));
+    if (config.hue !== 0) activeObj.filters.push(new fabric.Image.filters.HueRotation({ rotation: config.hue }));
+    if (config.sharp) activeObj.filters.push(new fabric.Image.filters.Convolve({ matrix: [0, -1, 0, -1, 5, -1, 0, -1, 0] }));
+    if (config.highlight) activeObj.filters.push(new fabric.Image.filters.BlackWhite());
+    activeObj.applyFilters(); canvas.renderAll();
+  }
+
+  function reorderPage(direction) {
+    if (activeIndex === -1) return;
+    const targetIdx = activeIndex + direction;
+    if (targetIdx < 0 || targetIdx >= pagesArray.length) return;
+    const temp = pagesArray[activeIndex]; pagesArray[activeIndex] = pagesArray[targetIdx]; pagesArray[targetIdx] = temp;
+    selectPage(targetIdx);
+  }
+
+  function deleteActivePage() {
+    if (activeIndex === -1) return;
+    pagesArray.splice(activeIndex, 1);
+    activeIndex = pagesArray.length > 0 ? Math.max(0, activeIndex - 1) : -1;
+    canvas.clear(); renderThumbnails();
+    if (activeIndex !== -1) selectPage(activeIndex);
+  }
+
+  // FEATURE: SYNC LAYOUT DRAW ROUTINES FOR DATA HISTORY TABLE ARCHIVE
+  function drawHistoryTable(filesList) {
+    const tbody = document.getElementById('historyTableBody');
+    if (!filesList || filesList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No matching processing traces found in targeted Google Drive location.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filesList.map((file, index) => `
+      <tr>
+        <td class="fw-bold text-secondary">${index + 1}</td>
+        <td class="fw-medium text-dark text-truncate" style="max-width: 320px;" title="${file.name}">
+          <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>${file.name}
+        </td>
+        <td class="text-muted small">${file.timestamp || 'Just Now'}</td>
+        <td class="text-center">
+          <div class="btn-group btn-group-sm shadow-sm">
+            <a href="${file.url}" target="_blank" class="btn btn-success fw-semibold" title="View/Download file from cloud location">
+              <i class="bi bi-download me-1"></i> Download
+            </a>
+            <button class="btn btn-danger fw-semibold" onclick="executeFileDeletion('${file.id}')" title="Permanently move file asset to folder trash container">
+              <i class="bi bi-trash3-fill me-1"></i> Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // FEATURE: RELOAD DRIVE SYNC ACTION PIPELINE
+  function syncWithDriveFolderContents() {
+    const reloadIcon = document.getElementById('reloadIcon');
+    reloadIcon.classList.add('bi-spin', 'text-warning'); // Adds a spin animation during background fetches
+    
+    google.script.run
+      .withSuccessHandler(function(response) {
+        reloadIcon.className = "bi bi-arrow-clockwise";
+        if (response.status === 'success') {
+          drawHistoryTable(response.files);
+        } else {
+          console.error("Trace failure fetching matching entries: " + response.message);
+        }
+      })
+      .withFailureHandler(function(err) {
+        reloadIcon.className = "bi bi-arrow-clockwise";
+        alert("Communication routing channel block fault: " + err.message);
+      })
+      .fetchLatestFilesFromDrive();
+  }
+
+  // FEATURE: ASYNCHRONOUS DELETE CONTROLLER CALL
+  function executeFileDeletion(fileId) {
+    if (!confirm("Are you sure you want to delete this document from Google Drive?")) return;
+    
+    google.script.run
+      .withSuccessHandler(function(response) {
+        if (response.status === 'success') {
+          alert("Document moved to trash successfully.");
+          syncWithDriveFolderContents(); // Refresh layout display to match current server state space mappings
+        } else {
+          alert("Failed to delete asset node: " + response.message);
+        }
+      })
+      .withFailureHandler(function(err) {
+        alert("Network server loop execution fault context failure: " + err.message);
+      })
+      .deleteFileFromDrive(fileId);
+  }
+
+  // PDF ASYNC COMPILATION EXPORT ENGINE ROUTINE BUILD PIPELINES
+  async function compileAndUploadPDF() {
+    if (pagesArray.length === 0) { alert("Please capture or import at least one page document asset first."); return; }
+    const statusContainer = document.getElementById('statusContainer');
+    const saveBtn = document.getElementById('savePdfBtn');
+    statusContainer.classList.remove('d-none');
+    saveBtn.disabled = true;
+
+    const doc = new jsPDF({ orientation: pagesArray[0].orientation === 'portrait' ? 'p' : 'l', unit: 'pt', format: 'a4' });
+
+    for (let i = 0; i < pagesArray.length; i++) {
+      if (i > 0) { doc.addPage('a4', pagesArray[i].orientation === 'portrait' ? 'p' : 'l'); }
+      selectPage(i);
+      await new Promise(resolve => setTimeout(resolve, 250));
+      const pageDataUri = canvas.toDataURL({ format: 'jpeg', quality: 0.95 });
+      doc.addImage(pageDataUri, 'JPEG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
+    }
+
+    const base64DataUri = doc.output('datauristring');
+    const rawBase64Payload = base64DataUri.split(',')[1];
+    const pdfFilename = getTimestampFilename(); // Automatic date format constraint enforcement
+
+    google.script.run
+      .withSuccessHandler(function(response) {
+        statusContainer.classList.add('d-none'); saveBtn.disabled = false;
+        if (response.status === 'success') {
+          alert(`Success! Saved as ${response.fileName}`);
+          syncWithDriveFolderContents(); // Instantly update view table profile mapping arrays tracking logs
+        } else { alert(`Upload warning path trace error loop log: ${response.message}`); }
+      })
+      .withFailureHandler(function(err) { statusContainer.classList.add('d-none'); saveBtn.disabled = false; alert(`System Fault Node: ${err.message}`); })
+      .savePdfToDrive(rawBase64Payload, pdfFilename);
+  }
+</script>
+
+</body>
+</html>
