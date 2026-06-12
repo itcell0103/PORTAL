@@ -205,7 +205,7 @@
       position: absolute;
       right: 0;
       top: calc(100% + 8px);
-      width: 340px;
+      width: 360px;
       background: white;
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -228,7 +228,7 @@
       padding-bottom: 6px;
     }
     .todo-list {
-      max-height: 250px;
+      max-height: 280px;
       overflow-y: auto;
       list-style: none;
       padding: 0;
@@ -246,15 +246,50 @@
     .todo-item:last-child {
       border-bottom: none;
     }
+    .todo-item.task-completed {
+      opacity: 0.55;
+    }
+    .todo-item.task-completed .todo-item-text {
+      text-decoration: line-through;
+    }
     .todo-item-index {
       font-weight: 700;
       color: var(--group-iframe);
       font-size: 0.88rem;
       min-width: 22px;
     }
+    .todo-item-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
     .todo-item-text {
       color: var(--text-main);
     }
+    .todo-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .todo-assignee {
+      font-size: 0.72rem;
+      background-color: #f1f5f9;
+      color: #64748b;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+    }
+    .todo-status-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .status-active { color: var(--group-same-tab); }
+    .status-done { color: #10b981; text-decoration: none !important; }
 
     /* Mobile Hamburger Button */
     .menu-toggle {
@@ -630,12 +665,11 @@
 
     window.addEventListener('click', function(e) {
       if (!e.target.closest('.todo-wrapper')) {
-        document.getElementById('todoDropdown').classList.remove('remove');
         document.getElementById('todoDropdown').classList.remove('show');
       }
     });
 
-    // Helper to parse standard CSV rows handling potential comma containment inside quotes
+    // Helper robust CSV line data split array parser
     function parseCSV(text) {
       let lines = text.split(/\r?\n/);
       return lines.map(line => {
@@ -658,71 +692,88 @@
       }).filter(row => row.length >= 2 && row[0] !== "");
     }
 
-    // Dynamic Data Sync Engine
+    // Sheet endpoints configuration URL keys
     const SPREADSHEET_ID = '1N-ELtSr6PAE2ABQp6ashLK9O5Wdks8DdXe5g_32agW4';
     const NOTICE_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=0`;
     const TODO_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=170344121`;
 
     async function loadLiveSheetsData() {
-      // 1. Fetch Notice Ticker data (Gid: 0)
+      // 1. Parse Live Continuous Notice Scroll Ticker (Gid: 0)
       try {
-        const noticeResponse = await fetch(noticeNoticeUrlWithCacheBust(NOTICE_CSV_URL));
+        const noticeResponse = await fetch(sheetUrlCacheBust(NOTICE_CSV_URL));
         const noticeText = await noticeResponse.text();
         const noticeRows = parseCSV(noticeText);
         
-        // Skip header row if first row is non-numeric descriptive titles
         const validNotices = noticeRows.filter((row, idx) => idx > 0 || !isNaN(row[0]));
         
         if (validNotices.length > 0) {
-          // Combine notices into a single continuous ticker string
           const fullTickerText = validNotices.map(row => `[${row[0]}] ${row[1]}`).join('  •  ');
           document.getElementById('liveNoticeText').textContent = fullTickerText;
         } else {
           document.getElementById('liveNoticeText').textContent = "No active notices found.";
         }
       } catch (err) {
-        console.error("Notice fetch failure:", err);
+        console.error("Notice stream failure:", err);
         document.getElementById('liveNoticeText').textContent = "Failed to sync notice announcements.";
       }
 
-      // 2. Fetch Numbered To-Do Task list (Gid: 170344121)
+      // 2. Parse Live Filterable Assigned To-Do List (Gid: 170344121)
       try {
-        const todoResponse = await fetch(noticeNoticeUrlWithCacheBust(TODO_CSV_URL));
+        const todoResponse = await fetch(sheetUrlCacheBust(TODO_CSV_URL));
         const todoText = await todoResponse.text();
         const todoRows = parseCSV(todoText);
         
+        // Skip header validation filter parsing 
         const validTodos = todoRows.filter((row, idx) => idx > 0 || !isNaN(row[0]));
+        
         const listEl = document.getElementById('todoList');
         const countEl = document.getElementById('todoCount');
         
         listEl.innerHTML = '';
-        countEl.textContent = validTodos.length;
+        
+        // Count only tasks that are NOT completed/done
+        let pendingCount = 0;
 
         if (validTodos.length > 0) {
           validTodos.forEach(row => {
+            const serialNo = row[0] || '';
+            const taskText = row[1] || '';
+            const assignee = row[2] || 'Unassigned';
+            const status = (row[3] || 'Pending').trim();
+
+            const isDone = ['done', 'completed', 'finished'].includes(status.toLowerCase());
+            if (!isDone) pendingCount++;
+
             const li = document.createElement('li');
-            li.className = 'todo-item';
+            li.className = `todo-item ${isDone ? 'task-completed' : ''}`;
+            
             li.innerHTML = `
-              <span class="todo-item-index">${row[0]}.</span>
-              <span class="todo-item-text">${row[1]}</span>
+              <span class="todo-item-index">${serialNo}.</span>
+              <div class="todo-item-content">
+                <span class="todo-item-text">${taskText}</span>
+                <div class="todo-meta-row">
+                  <span class="todo-assignee">👤 ${assignee}</span>
+                  <span class="todo-status-tag ${isDone ? 'status-done' : 'status-active'}">• ${status}</span>
+                </div>
+              </div>
             `;
             listEl.appendChild(li);
           });
+          countEl.textContent = pendingCount;
         } else {
           listEl.innerHTML = '<li class="todo-item"><span class="todo-item-text" style="color:#94a3b8;">All caught up!</span></li>';
+          countEl.textContent = '0';
         }
       } catch (err) {
-        console.error("To-Do task fetch failure:", err);
+        console.error("To-Do data stream failure:", err);
         document.getElementById('todoList').innerHTML = '<li class="todo-item"><span class="todo-item-text" style="color:#f43f5e;">Error loading tasks.</span></li>';
       }
     }
 
-    // Avoids local browser cache blocking updates
-    function noticeNoticeUrlWithCacheBust(url) {
+    function sheetUrlCacheBust(url) {
       return `${url}&cachebust=${new Date().getTime()}`;
     }
 
-    // Automatically trigger fetch routine on load
     window.addEventListener('DOMContentLoaded', loadLiveSheetsData);
   </script>
 </body>
