@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABHI SIVAS TRADING COMPANY - Billing System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #18bc9c;
+            --dark-bg: #f8f9fa;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: #334155;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .nav-pills .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .nav-pills .nav-link.active, .nav-pills .nav-link:hover {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .invoice-item-row {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .invoice-item-row .product-meta {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #475569;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .invoice-item-row .product-meta span {
+            display: inline-block;
+        }
+        .invoice-item-row .product-meta strong {
+            color: #1e293b;
+        }
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            width: 3rem; height: 3rem;
+            border: 5px solid #cbd5e1;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        @media (max-width: 991px) {
+            .nav-pills {
+                flex-direction: row !important;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            .nav-pills::-webkit-scrollbar {
+                height: 4px;
+            }
+            .nav-pills::-webkit-scrollbar-thumb {
+                background-color: var(--border-color);
+                border-radius: 4px;
+            }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .print-container { width: 100%; padding: 0; margin: 0; }
+        }
+    </style>
+    <link rel="manifest" href="?manifest=json">
+
+<meta name="theme-color" content="#2c3e50">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="apple-touch-icon" href="?icon=192">
+
+<link rel="icon" type="image/png" href="?icon=192">
+<link rel="shortcut icon" href="?icon=192">
+</head>
+
+<body>
+
+    <div id="loadingOverlay">
+        <div class="spinner mb-3"></div>
+        <h5 id="loadingStatusText" class="fw-bold text-muted">Syncing inventory data ranges...</h5>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 10000;">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header text-white" id="toastHeader">
+                <i class="fa-solid fa-bell me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notification</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body bg-white text-dark fw-medium border" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark no-print">
+        <div class="container-fluid">
+            <a class="navbar-brand text-truncate" href="#"><i class="fa-solid fa-file-invoice-dollar me-2 text-info"></i>ASTC BILLING ENGINE</a>
+            <span class="navbar-text d-none d-md-inline text-white-50 small">v2.1.0-Stable</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid my-4">
+        <div class="row">
+            
+            <div class="col-12 col-lg-2 mb-4 no-print">
+                <div class="sidebar-card p-3">
+                    <div class="text-center mb-3 d-none d-lg-block">
+                        <div class="fw-bold text-primary small border-bottom pb-2">ABHI SIVAS TRADING</div>
+                    </div>
+                    <div class="nav flex-row flex-lg-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link active text-start me-2 me-lg-0" id="tab-dashboard" data-bs-toggle="pill" data-bs-target="#view-dashboard" type="button"><i class="fa-solid fa-chart-pie me-2"></i>Dashboard</button>
+                        <button class="nav-link text-start me-2 me-lg-0" id="tab-billing" data-bs-toggle="pill" data-bs-target="#view-billing" type="button" onclick="checkActiveInvoiceState()"><i class="fa-solid fa-calculator me-2"></i>New Bill</button>
+                        <button class="nav-link text-start me-2 me-lg-0" id="tab-invoices" data-bs-toggle="pill" data-bs-target="#view-invoices" type="button" onclick="loadInvoiceLedger()"><i class="fa-solid fa-receipt me-2"></i>Ledger</button>
+                        <button class="nav-link text-start me-2 me-lg-0" id="tab-products" data-bs-toggle="pill" data-bs-target="#view-products" type="button" onclick="loadProductCatalog()"><i class="fa-solid fa-boxes-stacked me-2"></i>Products</button>
+                        <button class="nav-link text-start" id="tab-clients" data-bs-toggle="pill" data-bs-target="#view-clients" type="button" onclick="loadClientDirectory()"><i class="fa-solid fa-users me-2"></i>Clients</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-10">
+                <div class="tab-content" id="v-pills-tabContent">
+                    
+                    <!-- Dashboard -->
+                    <div class="tab-pane fade show active" id="view-dashboard" role="tabpanel">
+                        <h4 class="fw-bold mb-4 no-print"><i class="fa-solid fa-gauge-high me-2 text-muted"></i>Operational Command Overview</h4>
+                        <div class="row g-3 mb-4 no-print">
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="stat-card p-3 d-flex align-items-center justify-content-between">
+                                    <div><div class="text-muted small fw-medium">Active Products</div><h3 id="totalProducts" class="fw-bold my-1">0</h3></div>
+                                    <i class="fa-solid fa-box fa-2x text-muted opacity-50"></i>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="stat-card p-3 d-flex align-items-center justify-content-between" style="border-left-color: #18bc9c;">
+                                    <div><div class="text-muted small fw-medium">Registered Accounts</div><h3 id="totalClients" class="fw-bold my-1">0</h3></div>
+                                    <i class="fa-solid fa-address-book fa-2x text-muted opacity-50"></i>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="stat-card p-3 d-flex align-items-center justify-content-between" style="border-left-color: #f39c12;">
+                                    <div><div class="text-muted small fw-medium">Invoices Transacted</div><h3 id="totalInvoices" class="fw-bold my-1">0</h3></div>
+                                    <i class="fa-solid fa-file-invoice fa-2x text-muted opacity-50"></i>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="stat-card p-3 d-flex align-items-center justify-content-between" style="border-left-color: #e74c3c;">
+                                    <div><div class="text-muted small fw-medium">Current Month Vol</div><h3 id="monthlyRevenue" class="fw-bold my-1">₹0.00</h3></div>
+                                    <i class="fa-solid fa-indian-rupee-sign fa-2x text-muted opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing / Tax Invoice Terminal -->
+                    <div class="tab-pane fade" id="view-billing" role="tabpanel">
+                        <div class="card sidebar-card p-3 p-md-4">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-3 no-print">
+                                <h4 class="fw-bold mb-2 mb-md-0"><i class="fa-solid fa-file-signature text-muted me-2"></i>Tax Invoice Terminal</h4>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearInvoiceFormAndReset()"><i class="fa-solid fa-rotate me-1"></i>Reset Workspace</button>
+                            </div>
+                            
+                            <form id="invoiceForm" onsubmit="handleInvoiceSubmission(event)">
+                                <input type="hidden" id="editInvoiceNumber" value="">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label small fw-bold">Select Billing Client Target</label>
+                                        <select id="clientSelect" class="form-select form-select-sm" required onchange="fetchSelectedClientMetadata(this.value)">
+                                            <option value="">-- Choose Client --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label small fw-bold">Invoice Registration Date</label>
+                                        <input type="date" id="invoiceDate" class="form-control form-control-sm" required>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label small fw-bold">Invoice Tracking ID</label>
+                                        <input type="text" id="invoiceNumberDisplay" class="form-control form-control-sm bg-light" placeholder="[Auto-Generated ID Matrix]" readonly>
+                                    </div>
+                                </div>
+
+                                <!-- Client Details Display -->
+                                <div id="clientDetailsDisplay" class="mb-3 p-2 bg-light border rounded small">
+                                    <div class="row">
+                                        <div class="col-6"><span class="fw-bold">GSTIN:</span> <span id="selectedClientGstin">-</span></div>
+                                        <div class="col-6"><span class="fw-bold">Address:</span> <span id="selectedClientAddress">-</span></div>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold border-bottom pb-2 mb-3"><i class="fa-solid fa-list-ol me-2 text-muted"></i>Line Item Calculation Rows</h6>
+                                <div id="invoiceItems" class="mb-3"></div>
+                                
+                                <button type="button" class="btn btn-sm btn-dark mb-4 no-print" onclick="addInvoiceItem()"><i class="fa-solid fa-plus me-1"></i>Append Line Item</button>
+
+                                <div class="row justify-content-end">
+                                    <div class="col-12 col-md-6 col-lg-5">
+                                        <div class="card p-3 bg-light border-0">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="small fw-medium">Taxable Base Subtotal:</span>
+                                                <span class="fw-bold text-dark" id="calcSubtotal">₹0.00</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="small fw-medium">CGST Central Levy:</span>
+                                                <span class="fw-bold text-dark" id="calcCGST">₹0.00</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="small fw-medium">SGST State Levy:</span>
+                                                <span class="fw-bold text-dark" id="calcSGST">₹0.00</span>
+                                            </div>
+                                            <div class="row align-items-center g-2 mb-2">
+                                                <div class="col-6"><span class="small fw-medium">Markdown Discount:</span></div>
+                                                <div class="col-6"><input type="number" id="invoiceDiscount" class="form-control form-control-sm text-end" value="0" min="0" step="0.01" oninput="calculateComprehensiveGrandTotals()"></div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
+                                                <span class="fw-bold text-primary">Final Grand Total:</span>
+                                                <span class="h4 fw-bold text-primary mb-0" id="calcGrandTotal">₹0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="my-4 no-print">
+                                <div class="text-end no-print">
+                                    <button type="submit" class="btn btn-primary px-4 w-100 w-md-auto"><i class="fa-solid fa-floppy-disk me-2"></i>Commit and Process Invoice</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Ledger -->
+                    <div class="tab-pane fade" id="view-invoices" role="tabpanel">
+                        <div class="card sidebar-card p-3 p-md-4">
+                            <h4 class="fw-bold border-bottom pb-3 mb-3"><i class="fa-solid fa-receipt me-2 text-muted"></i>Historical Invoice Ledger</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm align-middle small text-nowrap">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Invoice ID</th>
+                                            <th>Date</th>
+                                            <th>Client Target</th>
+                                            <th>GSTIN</th>
+                                            <th class="text-end">Grand Total</th>
+                                            <th class="text-center no-print">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invoiceLedgerTableBody">
+                                        <tr><td colspan="6" class="text-center text-muted py-3">No active records retrieved.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products -->
+                    <div class="tab-pane fade" id="view-products" role="tabpanel">
+                        <div class="card sidebar-card p-3 p-md-4">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-3">
+                                <h4 class="fw-bold mb-2 mb-md-0"><i class="fa-solid fa-boxes-stacked me-2 text-muted"></i>Product Inventory</h4>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#productModal" onclick="clearProductModalForm()"><i class="fa-solid fa-plus me-1"></i>New Product</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm align-middle small text-nowrap">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Item Name</th>
+                                            <th>Description</th>
+                                            <th>HSN Code</th>
+                                            <th>UOM</th>
+                                            <th class="text-end">Price</th>
+                                            <th class="text-center">Control</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productCatalogTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clients -->
+                    <div class="tab-pane fade" id="view-clients" role="tabpanel">
+                        <div class="card sidebar-card p-3 p-md-4">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-3">
+                                <h4 class="fw-bold mb-2 mb-md-0"><i class="fa-solid fa-users me-2 text-muted"></i>Client Account Matrix</h4>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal"><i class="fa-solid fa-user-plus me-1"></i>Add Client</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm align-middle small text-nowrap">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Corporate Entity Name</th>
+                                            <th>GSTIN Code</th>
+                                            <th>Registered Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clientDirectoryTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="productForm" onsubmit="handleProductFormSubmission(event)">
+                    <div class="modal-header bg-dark text-white py-2">
+                        <h5 class="modal-title small fw-bold" id="productModalTitle">Inventory Item Registry</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body small">
+                        <input type="hidden" id="editProductOldItemKey" value="">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Primary Item Identity Name</label>
+                            <input type="text" id="prodItem" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Product Technical Description</label>
+                            <textarea id="prodDesc" class="form-control form-control-sm" rows="2"></textarea>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">HSN Code</label>
+                                    <input type="text" id="prodHsn" class="form-control form-control-sm" required>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">UOM</label>
+                                    <input type="text" id="prodUnit" class="form-control form-control-sm" value="Nos" placeholder="Nos, Kgs..." required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Base Unit Price (₹)</label>
+                            <input type="number" id="prodPrice" class="form-control form-control-sm" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="clientForm" onsubmit="handleClientFormSubmission(event)">
+                    <div class="modal-header bg-dark text-white py-2">
+                        <h5 class="modal-title small fw-bold">Client Profile Link</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body small">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Corporate Legal Name</label>
+                            <input type="text" id="cliName" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">GSTIN Code</label>
+                            <input type="text" id="cliGstin" class="form-control form-control-sm" placeholder="32XXXXXXXXXXXXZ">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Primary Bill-To Address</label>
+                            <textarea id="cliAddress" class="form-control form-control-sm" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Register Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global Local Storage Runtime Array
+        let globalCachedProducts = [];
+
+        // TOAST NOTIFICATION HELPER
+        function showToast(message, isSuccess = true) {
+            const toastEl = document.getElementById('liveToast');
+            const toastHeader = document.getElementById('toastHeader');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastHeader.className = `toast-header text-white ${isSuccess ? 'bg-success' : 'bg-danger'}`;
+            toastTitle.innerText = isSuccess ? 'Success' : 'Error';
+            toastMessage.innerText = message;
+
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            toast.show();
+        }
+
+        // Application Lifecycle Core Initialization
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('invoiceDate').valueAsDate = new Date();
+            initializeApplicationData();
+        });
+
+        function initializeApplicationData() {
+            updateLoadingStatus("Querying runtime configuration metrics...");
+            
+            google.script.run
+                .withSuccessHandler(function(metrics) {
+                    if(document.getElementById('totalProducts')) document.getElementById('totalProducts').innerText = metrics.productsCount;
+                    if(document.getElementById('totalClients')) document.getElementById('totalClients').innerText = metrics.clientsCount;
+                    if(document.getElementById('totalInvoices')) document.getElementById('totalInvoices').innerText = metrics.invoicesCount;
+                    if(document.getElementById('monthlyRevenue')) document.getElementById('monthlyRevenue').innerText = '₹' + metrics.monthlyRevenue;
+                    precacheAndLoadDropdowns();
+                })
+                .withFailureHandler(function(err) {
+                    showToast("Critical Runtime Initialization Failed: " + err.message, false);
+                    document.getElementById('loadingStatusText').innerHTML = `<span class="text-danger">Engine Sync Crash: ${err.message}</span>`;
+                })
+                .getDashboardMetrics();
+        }
+
+        function precacheAndLoadDropdowns() {
+            updateLoadingStatus("Caching active catalog inventory models...");
+            
+            google.script.run.withSuccessHandler(function(productsList) {
+                globalCachedProducts = productsList || [];
+                
+                google.script.run.withSuccessHandler(function(clientsList) {
+                    let select = document.getElementById('clientSelect');
+                    if(select) {
+                        select.innerHTML = '<option value="">-- Choose Client --</option>';
+                        clientsList.forEach(c => {
+                            select.innerHTML += `<option value="${c}">${c}</option>`;
+                        });
+                    }
+                    clearInvoiceFormAndReset();
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }).getClients();
+                
+            }).getProducts();
+        }
+
+        function updateLoadingStatus(textString) {
+            let elem = document.getElementById('loadingStatusText');
+            if (elem) elem.innerText = textString;
+        }
+
+        // ==================================== INVOICE DOM TREE ACTIONS ====================================
+        function clearInvoiceFormAndReset() {
+            document.getElementById('invoiceForm').reset();
+            document.getElementById('editInvoiceNumber').value = "";
+            document.getElementById('invoiceNumberDisplay').value = "[Auto-Generated ID Matrix]";
+            document.getElementById('invoiceDate').valueAsDate = new Date();
+            document.getElementById('invoiceItems').innerHTML = '';
+            document.getElementById('selectedClientGstin').innerText = '-';
+            document.getElementById('selectedClientAddress').innerText = '-';
+            addInvoiceItem();
+            calculateComprehensiveGrandTotals();
+        }
+
+        function checkActiveInvoiceState() {
+            let container = document.getElementById('invoiceItems');
+            if(!container || container.children.length === 0) {
+                clearInvoiceFormAndReset();
+            }
+        }
+
+        // Enhanced addInvoiceItem with visible description, HSN, UOM
+        function addInvoiceItem() {
+            let itemsContainer = document.getElementById('invoiceItems');
+            let rowId = 'row_' + Date.now() + Math.floor(Math.random() * 100);
+            
+            let itemHtml = `
+                <div class="invoice-item-row" id="${rowId}">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="small text-muted fw-bold d-block">Select Line Product</label>
+                            <select class="form-select form-select-sm product-select" onchange="autoPopulateProductRowFields(this, '${rowId}')" required>
+                                <option value="">Choose catalog item...</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="small text-muted fw-bold d-block">Quantity</label>
+                            <input type="number" class="form-control form-control-sm item-qty" value="1" min="0.01" step="any" oninput="calculateComprehensiveGrandTotals()" required>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="small text-muted fw-bold d-block">Unit Cost (₹)</label>
+                            <input type="number" class="form-control form-control-sm item-price" value="0" min="0" step="0.01" oninput="calculateComprehensiveGrandTotals()" required>
+                        </div>
+                        <div class="col-6 col-md-1">
+                            <label class="small text-muted fw-bold d-block">GST (%)</label>
+                            <select class="form-select form-select-sm item-gst-rate" onchange="calculateComprehensiveGrandTotals()">
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="12">12%</option>
+                                <option value="18" selected>5%</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="small text-muted fw-bold d-block">Net Total</label>
+                            <input type="text" class="form-control form-control-sm item-total-disp bg-light" value="₹0.00" readonly>
+                        </div>
+                        <div class="col-12 col-md-1 text-md-end text-center mt-2 mt-md-0">
+                            <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="removeInvoiceItemRow('${rowId}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Display product metadata -->
+                    <div class="product-meta">
+                        <span><strong>Description:</strong> <span class="item-desc-display">-</span></span>
+                        <span><strong>HSN:</strong> <span class="item-hsn-display">-</span></span>
+                        <span><strong>UOM:</strong> <span class="item-unit-display">Nos</span></span>
+                    </div>
+                    <!-- Hidden fields for storage -->
+                    <input type="hidden" class="item-hsn" value="">
+                    <input type="hidden" class="item-desc" value="">
+                    <input type="hidden" class="item-unit" value="Nos">
+                </div>
+            `;
+            
+            itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+            
+            let rowElement = document.getElementById(rowId);
+            let selectDropdown = rowElement.querySelector('.product-select');
+            
+            globalCachedProducts.forEach(p => {
+                let opt = document.createElement('option');
+                opt.value = p.item;
+                opt.text = p.item;
+                opt.setAttribute('data-price', p.price);
+                opt.setAttribute('data-hsn', p.hsn || '');
+                opt.setAttribute('data-desc', p.description || '');
+                opt.setAttribute('data-unit', p.unit || 'Nos');
+                selectDropdown.appendChild(opt);
+            });
+        }
+
+        function removeInvoiceItemRow(rowIdStr) {
+            let row = document.getElementById(rowIdStr);
+            if(row) row.remove();
+            
+            let container = document.getElementById('invoiceItems');
+            if(container && container.children.length === 0) {
+                addInvoiceItem();
+            }
+            calculateComprehensiveGrandTotals();
+        }
+
+        function autoPopulateProductRowFields(selectElement, targetRowId) {
+            let selectedOption = selectElement.options[selectElement.selectedIndex];
+            let rowElement = document.getElementById(targetRowId);
+            if (!rowElement) return;
+            
+            if (selectedOption.value) {
+                let derivedPrice = selectedOption.getAttribute('data-price') || 0;
+                let hsn = selectedOption.getAttribute('data-hsn') || '';
+                let desc = selectedOption.getAttribute('data-desc') || '';
+                let unit = selectedOption.getAttribute('data-unit') || 'Nos';
+                
+                rowElement.querySelector('.item-price').value = parseFloat(derivedPrice).toFixed(2);
+                rowElement.querySelector('.item-hsn').value = hsn;
+                rowElement.querySelector('.item-desc').value = desc;
+                rowElement.querySelector('.item-unit').value = unit;
+                
+                // Update display fields
+                rowElement.querySelector('.item-hsn-display').textContent = hsn || '-';
+                rowElement.querySelector('.item-desc-display').textContent = desc || '-';
+                rowElement.querySelector('.item-unit-display').textContent = unit || 'Nos';
+            } else {
+                rowElement.querySelector('.item-price').value = "0.00";
+                rowElement.querySelector('.item-hsn').value = '';
+                rowElement.querySelector('.item-desc').value = '';
+                rowElement.querySelector('.item-unit').value = 'Nos';
+                
+                rowElement.querySelector('.item-hsn-display').textContent = '-';
+                rowElement.querySelector('.item-desc-display').textContent = '-';
+                rowElement.querySelector('.item-unit-display').textContent = 'Nos';
+            }
+            calculateComprehensiveGrandTotals();
+        }
+
+        function calculateComprehensiveGrandTotals() {
+            let itemRows = document.getElementsByClassName('invoice-item-row');
+            let subtotalAccumulator = 0;
+            let taxAccumulator = 0;
+            
+            for(let i = 0; i < itemRows.length; i++) {
+                let r = itemRows[i];
+                let qty = parseFloat(r.querySelector('.item-qty').value) || 0;
+                let price = parseFloat(r.querySelector('.item-price').value) || 0;
+                let gstRatePercent = parseFloat(r.querySelector('.item-gst-rate').value) || 0;
+                
+                let lineBaseTaxableAmount = qty * price;
+                let lineTaxCalculatedComponent = lineBaseTaxableAmount * (gstRatePercent / 100);
+                let lineGrossAllocationTotal = lineBaseTaxableAmount + lineTaxCalculatedComponent;
+                
+                r.querySelector('.item-total-disp').value = "₹" + lineGrossAllocationTotal.toFixed(2);
+                
+                subtotalAccumulator += lineBaseTaxableAmount;
+                taxAccumulator += lineTaxCalculatedComponent;
+            }
+            
+            let markdownDiscount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+            let combinedGrandTotalBeforeRounding = subtotalAccumulator + taxAccumulator - markdownDiscount;
+            
+            let roundedFinalGrandTotal = Math.round(combinedGrandTotalBeforeRounding);
+            let roundingOffDelta = roundedFinalGrandTotal - combinedGrandTotalBeforeRounding;
+            
+            document.getElementById('calcSubtotal').innerText = "₹" + subtotalAccumulator.toFixed(2);
+            document.getElementById('calcCGST').innerText = "₹" + (taxAccumulator / 2).toFixed(2);
+            document.getElementById('calcSGST').innerText = "₹" + (taxAccumulator / 2).toFixed(2);
+            document.getElementById('calcGrandTotal').innerText = "₹" + roundedFinalGrandTotal.toFixed(2);
+            
+            document.getElementById('calcGrandTotal').setAttribute('data-raw-total', roundedFinalGrandTotal);
+            document.getElementById('calcGrandTotal').setAttribute('data-rounding', roundingOffDelta.toFixed(2));
+        }
+
+        function fetchSelectedClientMetadata(clientNameString) {
+            if (!clientNameString) {
+                document.getElementById('selectedClientGstin').innerText = '-';
+                document.getElementById('selectedClientAddress').innerText = '-';
+                return;
+            }
+            google.script.run.withSuccessHandler(function(details) {
+                if (details) {
+                    document.getElementById('selectedClientGstin').innerText = details.gstin || 'N/A';
+                    document.getElementById('selectedClientAddress').innerText = details.address || 'N/A';
+                } else {
+                    document.getElementById('selectedClientGstin').innerText = 'Not found';
+                    document.getElementById('selectedClientAddress').innerText = 'Not found';
+                }
+            }).getClientDetailsByName(clientNameString);
+        }
+
+        // ==================================== TRANSACTION PIPELINE ====================================
+        function handleInvoiceSubmission(eventObj) {
+            eventObj.preventDefault();
+            
+            let itemsArray = [];
+            let rows = document.getElementsByClassName('invoice-item-row');
+            
+            for(let i=0; i<rows.length; i++) {
+                let r = rows[i];
+                let selectElem = r.querySelector('.product-select');
+                if(!selectElem.value) continue;
+                
+                let qty = parseFloat(r.querySelector('.item-qty').value) || 0;
+                let uPrice = parseFloat(r.querySelector('.item-price').value) || 0;
+                let gstRate = parseFloat(r.querySelector('.item-gst-rate').value) || 0;
+                let lineTaxable = qty * uPrice;
+                let calculatedTax = lineTaxable * (gstRate / 100);
+                
+                itemsArray.push({
+                    itemName: selectElem.value,
+                    description: r.querySelector('.item-desc').value,
+                    hsnCode: r.querySelector('.item-hsn').value,
+                    unit: r.querySelector('.item-unit').value || 'Nos',
+                    quantity: qty,
+                    unitPrice: uPrice,
+                    cgst: (calculatedTax / 2),
+                    sgst: (calculatedTax / 2),
+                    totalAmount: (lineTaxable + calculatedTax)
+                });
+            }
+            
+            if(itemsArray.length === 0) {
+                showToast("Cannot commit empty calculation ledger rows.", false);
+                return;
+            }
+            
+            let gTotalElement = document.getElementById('calcGrandTotal');
+            
+            let invoicePayload = {
+                invoiceNumber: document.getElementById('editInvoiceNumber').value || null,
+                invoiceDate: document.getElementById('invoiceDate').value,
+                clientName: document.getElementById('clientSelect').value,
+                discount: parseFloat(document.getElementById('invoiceDiscount').value) || 0,
+                rounding: parseFloat(gTotalElement.getAttribute('data-rounding')) || 0,
+                grandTotal: parseFloat(gTotalElement.getAttribute('data-raw-total')) || 0,
+                items: itemsArray
+            };
+            
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            updateLoadingStatus("Processing invoice to Google Sheets...");
+            
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    if(res.success) {
+                        showToast(res.message + " ID: " + res.invoiceNumber, true);
+                        clearInvoiceFormAndReset();
+                        initializeApplicationData();
+                        document.getElementById('tab-dashboard').click();
+                    } else {
+                        showToast("Processing Exception: " + res.message, false);
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showToast("Pipeline Failure: " + err.message, false);
+                })
+                .saveInvoiceData(invoicePayload);
+        }
+
+        // ==================================== REVENUE HISTORY LEDGER & PRINTING ====================================
+        function loadInvoiceLedger() {
+            let tbody = document.getElementById('invoiceLedgerTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2 text-secondary"></div>Fetching history...</td></tr>';
+            
+            google.script.run.withSuccessHandler(function(dataList) {
+                tbody.innerHTML = '';
+                if(!dataList || dataList.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No transactions found.</td></tr>';
+                    return;
+                }
+                dataList.forEach(inv => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold text-dark">${inv.invoiceNumber}</td>
+                            <td>${inv.invoiceDate}</td>
+                            <td>${inv.clientName}</td>
+                            <td><code class="text-secondary">${inv.clientGstin || 'N/A'}</code></td>
+                            <td class="text-end fw-bold text-primary">₹${parseFloat(inv.grandTotal).toFixed(2)}</td>
+                            <td class="text-center no-print text-nowrap">
+                                <button class="btn btn-xs btn-outline-dark py-0 px-2 me-1" onclick="editExistingInvoiceTarget('${inv.invoiceNumber}')" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="printInvoicePDF('${inv.invoiceNumber}')" title="Print PDF"><i class="fa-solid fa-print"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }).getInvoiceList();
+        }
+
+        function printInvoicePDF(invIdString) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            updateLoadingStatus("Generating Print Document...");
+            
+            google.script.run.withSuccessHandler(function(res) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                if(res.success) {
+                    showToast("PDF generated! Opening in a new tab.", true);
+                    window.open(res.url, '_blank');
+                } else {
+                    showToast("Failed to generate PDF: " + res.message, false);
+                }
+            }).withFailureHandler(function(err) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast("Server error during PDF generation.", false);
+            }).generateAndSaveInvoicePDF(invIdString);
+        }
+
+        function editExistingInvoiceTarget(invIdString) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            updateLoadingStatus("Decompressing transactional data...");
+            
+            google.script.run.withSuccessHandler(function(invObj) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                if(!invObj) {
+                    showToast("Failed to pinpoint targets.", false);
+                    return;
+                }
+                
+                document.getElementById('tab-billing').click();
+                document.getElementById('editInvoiceNumber').value = invObj.invoiceNumber;
+                document.getElementById('invoiceNumberDisplay').value = invObj.invoiceNumber + " [Edit Mode]";
+                document.getElementById('invoiceDate').value = invObj.invoiceDate;
+                document.getElementById('clientSelect').value = invObj.clientName;
+                document.getElementById('invoiceDiscount').value = invObj.discount;
+                
+                fetchSelectedClientMetadata(invObj.clientName);
+                
+                let container = document.getElementById('invoiceItems');
+                container.innerHTML = '';
+                
+                invObj.items.forEach(itm => {
+                    addInvoiceItem();
+                    let rows = container.getElementsByClassName('invoice-item-row');
+                    let targetRow = rows[rows.length - 1];
+                    
+                    targetRow.querySelector('.product-select').value = itm.itemName;
+                    targetRow.querySelector('.item-qty').value = itm.quantity;
+                    targetRow.querySelector('.item-price').value = itm.unitPrice;
+                    
+                    // Fill hidden and display fields
+                    targetRow.querySelector('.item-hsn').value = itm.hsnCode || '';
+                    targetRow.querySelector('.item-desc').value = itm.description || '';
+                    targetRow.querySelector('.item-unit').value = itm.unit || 'Nos';
+                    
+                    targetRow.querySelector('.item-hsn-display').textContent = itm.hsnCode || '-';
+                    targetRow.querySelector('.item-desc-display').textContent = itm.description || '-';
+                    targetRow.querySelector('.item-unit-display').textContent = itm.unit || 'Nos';
+                    
+                    // Set GST rate based on cgst+sgst
+                    let totalTax = (itm.cgst || 0) + (itm.sgst || 0);
+                    let approxGstPercent = totalTax > 0 ? Math.round((totalTax / (itm.quantity * itm.unitPrice)) * 100) : 0;
+                    
+                    let gstSelect = targetRow.querySelector('.item-gst-rate');
+                    gstSelect.value = approxGstPercent;
+                    if(!gstSelect.value) {
+                        gstSelect.innerHTML += `<option value="${approxGstPercent}">${approxGstPercent}%</option>`;
+                        gstSelect.value = approxGstPercent;
+                    }
+                });
+                
+                calculateComprehensiveGrandTotals();
+            }).getInvoiceDetails(invIdString);
+        }
+
+        // ==================================== PRODUCT CATALOG CONTROLLER ====================================
+        function loadProductCatalog() {
+            let tbody = document.getElementById('productCatalogTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2 text-secondary"></div>Accessing catalogs...</td></tr>';
+            
+            google.script.run.withSuccessHandler(function(products) {
+                tbody.innerHTML = '';
+                products.forEach(p => {
+                    let escapedItem = p.item.replace(/'/g, "\\'");
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${p.item}</td>
+                            <td>${p.description || '-'}</td>
+                            <td>${p.hsn || '-'}</td>
+                            <td><span class="badge bg-secondary">${p.unit}</span></td>
+                            <td class="text-end fw-bold text-dark">₹${parseFloat(p.price).toFixed(2)}</td>
+                            <td class="text-center text-nowrap">
+                                <button class="btn btn-xs btn-outline-secondary py-0 px-2 me-1" onclick="openProductEditModal('${escapedItem}', '${p.description||''}', '${p.hsn||''}', '${p.unit}', ${p.price})"><i class="fa-solid fa-edit"></i></button>
+                                <button class="btn btn-xs btn-outline-danger py-0 px-2" onclick="executeProductDeletion('${escapedItem}')"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                globalCachedProducts = products;
+            }).getProducts();
+        }
+
+        function clearProductModalForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editProductOldItemKey').value = '';
+            document.getElementById('productModalTitle').innerText = "Inventory Item Registry";
+        }
+
+        function openProductEditModal(item, desc, hsn, unit, price) {
+            clearProductModalForm();
+            document.getElementById('productModalTitle').innerText = "Modify Inventory Model";
+            document.getElementById('editProductOldItemKey').value = item;
+            document.getElementById('prodItem').value = item;
+            document.getElementById('prodDesc').value = desc;
+            document.getElementById('prodHsn').value = hsn;
+            document.getElementById('prodUnit').value = unit;
+            document.getElementById('prodPrice').value = price;
+            
+            let modalObj = new bootstrap.Modal(document.getElementById('productModal'));
+            modalObj.show();
+        }
+
+        function handleProductFormSubmission(e) {
+            e.preventDefault();
+            let oldKey = document.getElementById('editProductOldItemKey').value;
+            
+            let payload = {
+                item: document.getElementById('prodItem').value.trim(),
+                description: document.getElementById('prodDesc').value.trim(),
+                hsn: document.getElementById('prodHsn').value.trim(),
+                unit: document.getElementById('prodUnit').value.trim(),
+                price: parseFloat(document.getElementById('prodPrice').value) || 0
+            };
+            
+            let modalElement = document.getElementById('productModal');
+            let modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if(modalInstance) modalInstance.hide();
+            
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            updateLoadingStatus("Writing target product record...");
+            
+            if(oldKey) {
+                google.script.run.withSuccessHandler(function(res){
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showToast(res.message, res.success);
+                    precacheAndLoadDropdowns();
+                    loadProductCatalog();
+                }).updateProduct(oldKey, payload);
+            } else {
+                google.script.run.withSuccessHandler(function(res){
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showToast(res.message, res.success);
+                    precacheAndLoadDropdowns();
+                    loadProductCatalog();
+                }).addProduct(payload);
+            }
+        }
+
+        function executeProductDeletion(itemKeyName) {
+            if(!confirm("Are you sure you want to delete: " + itemKeyName + "?")) return;
+            
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            google.script.run.withSuccessHandler(function(res){
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast(res.message, res.success);
+                precacheAndLoadDropdowns();
+                loadProductCatalog();
+            }).deleteProduct(itemKeyName);
+        }
+
+        // ==================================== CLIENTS DIRECTORY CONTROLLER ====================================
+        function loadClientDirectory() {
+            let tbody = document.getElementById('clientDirectoryTableBody');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2 text-secondary"></div>Querying identities...</td></tr>';
+            
+            google.script.run.withSuccessHandler(function(clientsList) {
+                tbody.innerHTML = '';
+                if(!clientsList || clientsList.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">No active clients.</td></tr>';
+                    return;
+                }
+                clientsList.forEach(c => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold text-dark">${c.name}</td>
+                            <td><code class="text-secondary fw-bold">${c.gstin || 'N/A'}</code></td>
+                            <td class="text-wrap">${c.address || '-'}</td>
+                        </tr>
+                    `;
+                });
+            }).getClientsWithDetails();
+        }
+
+        function handleClientFormSubmission(e) {
+            e.preventDefault();
+            let payload = {
+                name: document.getElementById('cliName').value.trim(),
+                gstin: document.getElementById('cliGstin').value.trim().toUpperCase(),
+                address: document.getElementById('cliAddress').value.trim()
+            };
+            
+            let modalElement = document.getElementById('clientModal');
+            let modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if(modalInstance) modalInstance.hide();
+            
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            updateLoadingStatus("Registering profile node...");
+            
+            google.script.run.withSuccessHandler(function(res) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast(res.message, res.success);
+                document.getElementById('clientForm').reset();
+                precacheAndLoadDropdowns();
+                loadClientDirectory();
+            }).addClient(payload);
+        }
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('?serviceworker=js')
+    .then(() => console.log('Service Worker Registered'))
+    .catch(err => console.error(err));
+}
+</script>
+</body>
+</html>
