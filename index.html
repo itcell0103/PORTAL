@@ -1,101 +1,298 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base target="_top">
+  <title>Sub Treasury Vanchiyoor Portal</title>
   <style>
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      margin: 0; 
-      padding: 0; 
-      display: flex; 
-      height: 100vh; 
-      background-color: #f4f7f6; 
+    :root {
+      --bg-color: #f8fafc;
+      --sidebar-bg: #1e293b;
+      --sidebar-header: #0f172a;
+      --accent-color: #fbbf24;
+      --text-main: #334155;
+      --group-new-tab: #f43f5e;
+      --group-new-tab-hover: #e11d48;
+      /* Treasury Tools Color Variables */
+      --group-same-tab: #1ea8d6;
+      --group-same-tab-hover: #11bedd;
+      --group-other-sites: #32a8a4;
+      --group-other-sites-hover: #26827f;
+      --group-iframe: #0ea5e9;
+      --group-iframe-hover: #0284c7;
+      --border-color: #e2e8f0;
     }
-    
+    body { 
+       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+       margin: 0; 
+       padding: 0; 
+       display: flex; 
+       height: 100vh; 
+       background-color: var(--bg-color); 
+       color: var(--text-main);
+      overflow: hidden;
+    }
+        
     /* Sidebar Styles */
     #sidebar { 
-      width: 260px; 
-      background-color: #2c3e50; 
-      color: white; 
-      display: flex; 
-      flex-direction: column; 
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+       width: 280px; 
+       background-color: var(--sidebar-bg); 
+       color: #f8fafc; 
+       display: flex; 
+       flex-direction: column; 
+       box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
     }
     .header { 
-      padding: 25px 20px; 
-      text-align: center; 
-      background-color: #1a252f; 
-      font-weight: bold; 
-      font-size: 1.2em; 
-      color: #f1c40f;
+       padding: 30px 24px; 
+       text-align: center; 
+       background-color: var(--sidebar-header); 
+       font-weight: 700; 
+       font-size: 1.25em; 
+       color: var(--accent-color);
+      line-height: 1.4;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     .menu { 
-      list-style: none; 
-      padding: 0; 
-      margin: 0; 
-      width: 100%; 
+       list-style: none; 
+       padding: 10px 0; 
+       margin: 0; 
+       width: 100%; 
+       overflow-y: auto;
     }
     .menu a { 
-      display: block; 
-      padding: 15px 20px; 
-      color: #ecf0f1; 
-      text-decoration: none; 
-      border-bottom: 1px solid #34495e; 
-      transition: background 0.3s; 
+       display: block; 
+       padding: 14px 24px; 
+       color: #cbd5e1; 
+       text-decoration: none; 
+       font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.25s ease; 
     }
     .menu a:hover { 
-      background-color: #34495e; 
-      border-left: 4px solid #f1c40f;
+       background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      padding-left: 28px;
+      border-left: 4px solid var(--accent-color);
     }
-    
+        
     /* Submenu Styles */
     .submenu { 
-      display: none; 
-      background-color: #243342; 
-      list-style: none; 
-      padding: 0; 
-    }
+       display: none; 
+       background-color: rgba(0, 0, 0, 0.2); 
+       list-style: none; 
+       padding: 5px 0; 
+     }
     .submenu a { 
-      padding-left: 40px; 
-      border-bottom: none; 
-      font-size: 0.9em; 
+       padding: 10px 24px 10px 44px; 
+       font-size: 0.88em; 
+       color: #94a3b8;
     }
     .submenu a:hover { 
-      background-color: #1a252f; 
+       background-color: rgba(255,255,255,0.03); 
+       color: var(--accent-color);
+      padding-left: 48px;
+      border-left: none;
     }
     .has-submenu:hover .submenu { 
-      display: block; 
-    }
-    
-    /* Main Content & Iframe Styles */
+       display: block; 
+     }
+        
+    /* Main Content Layout */
     #main-content { 
-      flex-grow: 1; 
-      display: flex; 
-      flex-direction: column; 
+       flex-grow: 1; 
+       display: flex; 
+       flex-direction: column; 
+       height: 100%;
+      overflow-y: auto;
+      position: relative;
     }
     .topbar { 
-      background-color: #ffffff; 
-      padding: 20px; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-      text-align: center; 
-      font-size: 1.5em; 
-      color: #2c3e50; 
-      font-weight: bold; 
+       background-color: #ffffff; 
+       padding: 15px 40px; 
+       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left; 
+      gap: 20px;
+      border-bottom: 1px solid var(--border-color);
     }
-    #iframe-container { 
-      flex-grow: 1; 
-      padding: 15px; 
+    /* Notification Scroll Ticker Styles */
+    .notification-container {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      overflow: hidden;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 16px;
     }
-    iframe { 
-      width: 100%; 
-      height: 100%; 
-      border: none; 
-      background-color: white; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    .notification-label {
+      background-color: var(--group-new-tab-hover);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      margin-right: 15px;
+      box-shadow: 0 2px 4px rgba(225, 29, 72, 0.15);
+    }
+    .notification-scroll {
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+    }
+    .notification-text {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 30s linear infinite;
+      padding-left: 100%;
+      color: var(--text-main);
+    }
+    .notification-text:hover {
+      animation-play-state: paused;
+      cursor: pointer;
+    }
+    @keyframes marquee {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
     }
 
-    /* Modal Styles */
+    /* Embedded Todo List Styles */
+    .todo-wrapper {
+      position: relative;
+      user-select: none;
+    }
+    .todo-toggle-btn {
+      background-color: var(--sidebar-bg);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .todo-toggle-btn:hover {
+      background-color: var(--sidebar-header);
+      color: var(--accent-color);
+    }
+    .todo-badge {
+      background-color: var(--group-iframe);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .todo-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: 360px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+      z-index: 110;
+      padding: 16px;
+    }
+    .todo-dropdown.show {
+      display: block;
+    }
+    .todo-header {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--sidebar-header);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+    }
+    .todo-list {
+      max-height: 280px;
+      overflow-y: auto;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border-color);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .todo-item:last-child {
+      border-bottom: none;
+    }
+    .todo-item.task-completed {
+      opacity: 0.55;
+    }
+    .todo-item.task-completed .todo-item-text {
+      text-decoration: line-through;
+    }
+    .todo-item-index {
+      font-weight: 700;
+      color: var(--group-iframe);
+      font-size: 0.88rem;
+      min-width: 22px;
+    }
+    .todo-item-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .todo-item-text {
+      color: var(--text-main);
+    }
+    .todo-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .todo-assignee {
+      font-size: 0.72rem;
+      background-color: #f1f5f9;
+      color: #64748b;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+    }
+    .todo-status-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .status-active { color: var(--group-same-tab); }
+    .status-done { color: #10b981; text-decoration: none !important; }
+
+    /* Modal Styles for FD Interest Rates */
     .modal {
       display: none; 
       position: fixed; 
@@ -112,12 +309,13 @@
     .modal-content {
       background-color: #fff;
       padding: 25px 30px;
-      border-radius: 8px;
+      border-radius: 12px;
       width: 85%;
       max-width: 950px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       position: relative;
       animation: modalOpen 0.3s ease-in-out;
+      box-sizing: border-box;
     }
     @keyframes modalOpen {
       from {opacity: 0; transform: translateY(-20px);}
@@ -133,14 +331,15 @@
     }
     .close-modal:hover,
     .close-modal:focus {
-      color: #2c3e50;
+      color: var(--sidebar-header);
       text-decoration: none;
     }
     .modal-content h2 {
       margin-top: 0;
-      color: #2c3e50;
+      color: var(--sidebar-header);
       text-align: center;
       margin-bottom: 20px;
+      font-size: 1.4rem;
     }
     .fd-table {
       width: 100%;
@@ -149,85 +348,409 @@
       font-size: 0.95em;
     }
     .fd-table th, .fd-table td {
-      border: 1px solid #ddd;
+      border: 1px solid var(--border-color);
       padding: 12px;
       text-align: center;
     }
     .fd-table th {
-      background-color: #2c3e50;
+      background-color: var(--sidebar-bg);
       color: white;
     }
     .fd-table tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f8fafc;
     }
     .fd-table tr:hover {
-      background-color: #f1f1f1;
+      background-color: #f1f5f9;
+    }
+
+    /* Mobile Hamburger Button */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--sidebar-header);
+      cursor: pointer;
+    }
+    /* Sidebar Overlay for Mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 90;
+    }
+    /* Grid Dashboard Styles */
+    .dashboard-grid-container {
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+      flex-grow: 1;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 35px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .section-title:first-of-type { margin-top: 0; }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 24px;
+    }
+    .box-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 90px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .box-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .box-btn span {
+      font-size: 0.8rem;
+      font-weight: 400;
+      opacity: 0.85;
+      margin-top: 8px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    /* Button Colors */
+    .group-new-tab { background-color: var(--group-new-tab); }
+    .group-new-tab:hover { background-color: var(--group-new-tab-hover); }
+        
+    .group-same-tab { background-color: var(--group-same-tab); }
+    .group-same-tab:hover { background-color: var(--group-same-tab-hover); }
+    .group-other-sites { background-color: var(--group-other-sites); }
+    .group-other-sites:hover { background-color: var(--group-other-sites-hover); }
+    /* Iframe Wrapper styling */
+    #iframe-wrapper {
+      flex-grow: 1;
+      padding: 24px;
+      display: none; 
+      height: 100%;
+      background-color: #f1f5f9;
+      box-sizing: border-box;
+    }
+    iframe { 
+       width: 100%; 
+       height: 100%; 
+       border: 1px solid var(--border-color); 
+       background-color: white; 
+       border-radius: 12px; 
+       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); 
+     }
+    /* Modern Portal Footer Styling */
+    .portal-footer {
+      background-color: var(--sidebar-bg);
+      color: #94a3b8;
+      padding: 20px 40px;
+      border-top: 3px solid var(--accent-color);
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .footer-left {
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .footer-left span {
+      color: #f8fafc;
+    }
+    .footer-right {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      #sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      .menu-toggle {
+        display: inline-block;
+      }
+      .topbar {
+        padding: 15px 20px;
+        font-size: 1.1em;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .todo-dropdown {
+        right: auto;
+        left: 0;
+        width: calc(100vw - 40px);
+      }
+      .dashboard-grid-container {
+        padding: 20px;
+      }
+      .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      .box-btn {
+        height: 110px;
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+      #iframe-wrapper {
+        padding: 10px;
+      }
+      .has-submenu:focus-within .submenu {
+        display: block;
+      }
+      .portal-footer {
+        padding: 20px;
+      }
+      .footer-container {
+        flex-direction: column;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
-
-  <!-- Sidebar Menu -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
   <div id="sidebar">
     <div class="header">Sub Treasury<br>Vanchiyoor</div>
     <ul class="menu">
-      <li><a href="https://itcelldto.github.io/try/login.html" target="contentFrame">Home</a></li>
-      
-      <!-- Services with Submenus -->
+      <li><a href="javascript:void(0);" onclick="showDashboard()">Home Dashboard</a></li>   
       <li class="has-submenu">
         <a href="#">Services &#9662;</a>
         <ul class="submenu">
-          <li><a href="https://script.google.com/macros/s/AKfycbwhJxqW4wfNnn4luZt_SLt_GbVgz3ALCsclMDkEfA3DeWq8IkdCOnQZJqX2LPxEgJO0/exec" target="contentFrame">DDO Search</a></li>
-          <li><a href="https://spark.gov.in" target="contentFrame">SPARK (Salary)</a></li>
-          <li><a href="https://script.google.com/macros/s/AKfycby8NEXUVygvzrlHL2w7fZoRJn8xdslnFQruCXeuldzfji7c-sHMbs3a7Rs8opiFv6NjwA/exec" target="contentFrame">Challan To Bank Register</a></li>
-          <li><a href="https://script.google.com/macros/s/AKfycbwZ6dMep50nAK16AFTOBVqQvlRtL5tQi9Cq1Jlk51B1iVrEI_U4WbzSaMG2jyITFZSa/exec" target="contentFrame">Pension Book Register</a></li>
-          <li><a href="https://script.google.com/macros/s/AKfycbwyB-J4aEqgDscLWPuaiaZkrf2aUrmLSuZnI-5dOHOTszgRugeGDPY1DF4-D5nDF7Pq/exec" target="contentFrame">KYC Store</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbwhJxqW4wfNnn4luZt_SLt_GbVgz3ALCsclMDkEfA3DeWq8IkdCOnQZJqX2LPxEgJO0/exec" target="contentFrame" onclick="showIframe()">DDO Search</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycby8NEXUVygvzrlHL2w7fZoRJn8xdslnFQruCXeuldzfji7c-sHMbs3a7Rs8opiFv6NjwA/exec" target="contentFrame" onclick="showIframe()">Challan To Bank Register</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbwZ6dMep50nAK16AFTOBVqQvlRtL5tQi9Cq1Jlk51B1iVrEI_U4WbzSaMG2jyITFZSa/exec" target="contentFrame" onclick="showIframe()">Pension Book Register</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbwyB-J4aEqgDscLWPuaiaZkrf2aUrmLSuZnI-5dOHOTszgRugeGDPY1DF4-D5nDF7Pq/exec" target="contentFrame" onclick="showIframe()">KYC Store</a></li>
         </ul>
       </li>
-
-      <!-- Reports with Submenus -->
       <li class="has-submenu">
         <a href="#">AST Tools &#9662;</a>
         <ul class="submenu">
-          <li><a href="https://script.google.com/macros/s/AKfycbx7N4XWFquy7T8-jJV6tLNJ4akxAFksvq6APchS7O7ZZgahR6-pIhXo4jIUAhw5Ke8R/exec" target="contentFrame">CSV ഡാറ്റ അപ്‌ലോഡർ</a></li>
-          <li><a href="https://docs.google.com/spreadsheets/d/1gyoRP2zhqRHQjJ7L58dfWdib9q0HqHybQHTC5EvLenk/edit?gid=0#gid=0" target="contentFrame">CSV ഡാറ്റ Output Sheet</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbwK-f6n2gZ4a36ugUvqYwUwY4_YM46Q-A9z-1x2wQ4o6oeTgVz3LYD86j8PLO43hyp4/exec" target="contentFrame" onclick="showIframe()">File DropBox</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbyM3-YapeI8s6wvTwI7GOyRBJ1EgKIU-zFReLH3Z0tarwRtMbXlU7_ySk3zuNlmysG8JQ/exec" target="contentFrame" onclick="showIframe()">AST Doc-Scan</a></li>         
+          <li><a href="https://script.google.com/macros/s/AKfycbxvZu9JjjZMj1lGNPT-ZDbv9s1ldE4UkRP_kC7WOLrvv5wD17DTg53fMBQpkN09rT_AFQ/exec" target="contentFrame" onclick="showIframe()">Form 16/16A</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfxcbx7N4XWFquy7T8-jJV6tLNJ4akxAFksvq6APchS7O7ZZgahR6-pIhXo4jIUAhw5Ke8R/exec" target="contentFrame" onclick="showIframe()">CSV ഡാറ്റ അപ്‌ലോഡർ</a></li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1gyoRP2zhqRHQjJ7L58dfWdib9q0HqHybQHTC5EvLenk/edit?gid=0#gid=0" target="contentFrame" onclick="showIframe()">CSV ഡാറ്റ Output Sheet</a></li>
         </ul>
-      </li>
-      
-      <!-- Reports with Submenus -->
+      </li>   
       <li class="has-submenu">
         <a href="#">DT Dashboard & Links &#9662;</a>
         <ul class="submenu">
-          <li><a href="https://docs.google.com/spreadsheets/d/1V1AX6rOP1esXjO9AK6h3D1fMITIaw5ep94exAb_0FHg/edit?gid=0#gid=0" target="contentFrame">Dashboard</a></li>
-          <li><a href="https://docs.google.com/spreadsheets/d/1V1AX6rOP1esXjO9AK6h3D1fMITIaw5ep94exAb_0FHg/edit?gid=288782367#gid=288782367" target="contentFrame">DT Links</a></li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1V1AX6rOP1esXjO9AK6h3D1fMITIaw5ep94exAb_0FHg/edit?gid=0#gid=0" target="contentFrame" onclick="showIframe()">Dashboard</a></li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1V1AX6rOP1esXjO9AK6h3D1fMITIaw5ep94exAb_0FHg/edit?gid=288782367#gid=288782367" target="contentFrame" onclick="showIframe()">DT Links</a></li>
         </ul>
       </li>
-
-      <!-- IT Asset & Network Management -->
       <li class="has-submenu">
-        <a href="#">IT Asset & Network Management;</a>
+        <a href="#">IT Asset & Network &#9662;</a>
         <ul class="submenu">
-          <li><a href="https://fms.keralatreasury.in/treasury" target="contentFrame">IT Asset Management</a></li>
-          <li><a href="https://keralatreasury.github.io/network" target="contentFrame">Network</a></li>
+          <li><a href="https://fms.keralatreasury.in/treasury" target="contentFrame" onclick="showIframe()">IT Asset Management</a></li>
+          <li><a href="https://keralatreasury.github.io/network" target="contentFrame" onclick="showIframe()">Network</a></li>
         </ul>
       </li>
-
-      <!-- Popup Modal Trigger Link -->
-      <li><a href="#" onclick="openFdModal(); return false;" style="color: #f1c40f; font-weight: bold;">📊 FD Interest Rates</a></li>
-
-      <li><a href="https://itcelldto.github.io/try/login.html" target="contentFrame">DT IT Cell</a></li>
+      <li><a href="https://itcelldto.github.io/try/login.html" target="contentFrame" onclick="showIframe()">DT IT Cell</a></li>
     </ul>
   </div>
-
-  <!-- Main Content Area -->
   <div id="main-content">
-    <div class="topbar">Additional Sub Treasury Vanchiyoor - Dashboard</div>
-    <div id="iframe-container">
-      <iframe name="contentFrame" src="https://script.google.com/macros/s/AKfycbwah9LSeVYYRWDL7k_dzZpfUEhWqQnZ3_cPorIbF8RhjUsoI5IbQo5rei5QXRbtW-agvw/exec"></iframe>
+    <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">&#9776;</button>
+      <div class="notification-container">
+        <div class="notification-label">Notice</div>
+        <div class="notification-scroll">
+          <span class="notification-text" id="liveNoticeText">Loading live announcements...</span>
+        </div>
+      </div>
+      
+      <!-- FD Interest Rates Trigger Button added right after the Notification area -->
+      <button class="todo-toggle-btn" onclick="openFdModal()" style="background-color: var(--group-iframe); color: #fff;" title="View FD Interest Rates">
+        📊 FD Rates
+      </button>
+
+      <div class="todo-wrapper">
+        <button class="todo-toggle-btn" onclick="toggleTodoDropdown()">
+          📋 Tasks <span class="todo-badge" id="todoCount">0</span>
+        </button>
+        <div class="todo-dropdown" id="todoDropdown">
+          <div class="todo-header">
+            <span>Reminders / To-Do Task</span>
+          </div>
+          <ul class="todo-list" id="todoList">
+            <li class="todo-item"><span class="todo-item-text">Syncing with Google Sheets...</span></li>
+          </ul>
+        </div>
+      </div>
     </div>
+        
+    <div id="quick-dashboard" class="dashboard-grid-container">   
+        <h2 class="section-title">Treasury Sites (Opens in New Tab)</h2>
+        <div class="grid-container">
+            <a href="http://coretis.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                CoreTIS
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="http://tsb.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                TSB
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="http://pims.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                PiMS
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="http://credit.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                CREDIT
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="http://iams.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                iAMS
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="https://eofficetreasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-new-tab">
+                eOffice
+                <span>Opens external site ↗</span>
+            </a>
+        </div>
+        <h2 class="section-title">Treasury Tools (Open Here)</h2>
+        <div class="grid-container">
+            <a href="https://script.google.com/macros/s/AKfycbwK-f6n2gZ4a36ugUvqYwUwY4_YM46Q-A9z-1x2wQ4o6oeTgVz3LYD86j8PLO43hyp4/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                File DropBox
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbzyarGFupmjHfSrqzmi_8NjALSWm3juB9vXsuZ_75rhltqhD_Q3s39dxonCbVtaJrgG/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                AST Doc-Scan
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbz2FXtukSle_XMQOqS89jQbp55NXSed1kiR0j0EI6cU07oBiJvBikmeNF-ZfLTM5dMY/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                FD-Statement
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbxvZu9JjjZMj1lGNPT-ZDbv9s1ldE4UkRP_kC7WOLrvv5wD17DTg53fMBQpkN09rT_AFQ/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                Form 16/16A
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbxfmAFWagQIY_aPGmPFybfH15UjGip9l6GK0y8v7aX97FGjkyZ1lewKofss0xHdloCA/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                Tapal
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycby1jWnBiXUXtukFSQmBl9JRTjr6am8e2nOzkC9CBdUb4RQVAYaL-QMGgr623uH4Vh7e/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                AST Cashier 
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbzJoQF5E6468nYKQVk-8AxSGi_kF6Jf0E-dG5IT5gh3t_rMrHbr6mpFIW4SueBCvFIC7w/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                AST Teller 
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbxbw-V_kHdOuMLlGyEWKegKcAhZ8-6VnCLi0EWaVaWkhc3sy_4DXq0BzKiSirjfj9Bh/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                AST Pay/Pension & IT Calculator
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbyDnR3y_396cbLy-o-KF-J_Bv32dYj3wn-YwtpPIZggelmKZOomMEzG7fBujA6DNs-A/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                AST EL Calculator
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbwi5uRtT99kN0r6-LN8i5koN8G9wtw0A3AxUILZtVpBuHR-2duG2ypw1r9ON98xQ2GA/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                Bills Token
+                <span>Open Here ↓</span>
+            </a>
+            <a href="https://script.google.com/macros/s/AKfycbzuV-N57AZbWzSe7N9ncfdMKRak9i9efJg1sZBo1rCz3_yTGog3_3DvH4ksMx_YIXWeDQ/exec" target="contentFrame" onclick="showIframe()" class="box-btn group-same-tab">
+                Google Sheet Manager
+                <span>Open Here ↓</span>
+            </a>
+        </div>
+        <h2 class="section-title">Other Sites (Opens in New Tab)</h2>
+        <div class="grid-container">
+            <a href="https://mail.google.com/mail" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                Gmail
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="https://npscan-cra.com/CRA" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                NPSCAN CRA Single-Window
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="https://cra.nps-proteantech.in/CRA/" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                CRA NSDL Double-Window
+                <span>Opens external site ↗</span>
+            </a>
+            <a href="https://etreasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                eTreasury 01037700183
+                <span>Opens external site ↗</span>
+            </a>
+           <a href="https://bims.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                BIMS
+                <span>Opens external site ↗</span>
+            </a>
+           <a href="http://umas2.treasury.kerala.gov.in/" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                UMAS 2.0
+                <span>Opens external site ↗</span>
+            </a>
+           <a href="https://script.google.com/macros/s/AKfycbwFLLrl4MT630dOcu6bgUqvANvQQKlAmD5X54s62st3TMIm1gIfUc5G_NIBrRwMe1mUag/exec" target="_blank" rel="noopener noreferrer" class="box-btn group-other-sites">
+                Deposit Register Lapsed/Challan
+                <span>Opens external site ↗</span>
+            </a>
+        </div>
+    </div>
+    <div id="iframe-wrapper">
+      <iframe name="contentFrame" src="https://script.google.com/macros/s/AKfycbw4hro0UwrCxmrecma_1ScKLXc3UZgoQnqCD202lUogA7npk0g0NHr9fn16bknUMwgvhw/exec"></iframe>
+    </div>
+    <footer class="portal-footer">
+      <div class="footer-container">
+        <div class="footer-left">
+          &copy; 2026-27 <span>Additional Sub Treasury Vanchiyoor</span>. All Rights Reserved.
+        </div>
+        <div class="footer-right">
+          Fueled & Driven By 
+          Jasif A
+          Admin. AST Vanchiyoor 
+        </div>
+      </div>
+    </footer>
   </div>
 
-  <!-- FD Interest Rates Modal -->
+  <!-- FD Interest Rates Modal Structure -->
   <div id="fdModal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeFdModal()">&times;</span>
@@ -301,8 +824,34 @@
     </div>
   </div>
 
-  <!-- Modal Script -->
   <script>
+    const dashboard = document.getElementById('quick-dashboard');
+    const iframeWrapper = document.getElementById('iframe-wrapper');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    function toggleSidebar() {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+    function showIframe() {
+      dashboard.style.display = 'none';
+      iframeWrapper.style.display = 'block';
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+    function showDashboard() {
+      iframeWrapper.style.display = 'none';
+      dashboard.style.display = 'block';
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+
+    function toggleTodoDropdown() {
+      document.getElementById('todoDropdown').classList.toggle('show');
+    }
+
+    // Modal Control Functions
     function openFdModal() {
       document.getElementById('fdModal').style.display = 'flex';
     }
@@ -310,15 +859,122 @@
     function closeFdModal() {
       document.getElementById('fdModal').style.display = 'none';
     }
-    
-    // Close modal if user clicks outside the modal content box
-    window.onclick = function(event) {
-      var modal = document.getElementById('fdModal');
-      if (event.target == modal) {
+
+    window.addEventListener('click', function(e) {
+      if (!e.target.closest('.todo-wrapper')) {
+        document.getElementById('todoDropdown').classList.remove('show');
+      }
+      // Close FD modal if clicked outside modal content
+      const modal = document.getElementById('fdModal');
+      if (e.target === modal) {
         modal.style.display = 'none';
       }
-    }
-  </script>
+    });
 
+    // Helper robust CSV line data split array parser
+    function parseCSV(text) {
+      let lines = text.split(/\r?\n/);
+      return lines.map(line => {
+        let result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          let char = line[i];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      }).filter(row => row.length >= 2 && row[0] !== "");
+    }
+
+    // Sheet endpoints configuration URL keys
+    const SPREADSHEET_ID = '1N-ELtSr6PAE2ABQp6ashLK9O5Wdks8DdXe5g_32agW4';
+    const NOTICE_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=0`;
+    const TODO_CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=170344121`;
+
+    async function loadLiveSheetsData() {
+      // 1. Parse Live Continuous Notice Scroll Ticker (Gid: 0)
+      try {
+        const noticeResponse = await fetch(sheetUrlCacheBust(NOTICE_CSV_URL));
+        const noticeText = await noticeResponse.text();
+        const noticeRows = parseCSV(noticeText);
+        
+        const validNotices = noticeRows.filter((row, idx) => idx > 0 || !isNaN(row[0]));
+        
+        if (validNotices.length > 0) {
+          const fullTickerText = validNotices.map(row => `[${row[0]}] ${row[1]}`).join('  •  ');
+          document.getElementById('liveNoticeText').textContent = fullTickerText;
+        } else {
+          document.getElementById('liveNoticeText').textContent = "No active notices found.";
+        }
+      } catch (err) {
+        console.error("Notice stream failure:", err);
+        document.getElementById('liveNoticeText').textContent = "Failed to sync notice announcements.";
+      }
+
+      // 2. Parse Live Filterable Assigned To-Do List (Gid: 170344121)
+      try {
+        const todoResponse = await fetch(sheetUrlCacheBust(TODO_CSV_URL));
+        const todoText = await todoResponse.text();
+        const todoRows = parseCSV(todoText);
+        
+        const validTodos = todoRows.filter((row, idx) => idx > 0 || !isNaN(row[0]));
+        
+        const listEl = document.getElementById('todoList');
+        const countEl = document.getElementById('todoCount');
+        
+        listEl.innerHTML = '';
+        
+        let pendingCount = 0;
+
+        if (validTodos.length > 0) {
+          validTodos.forEach(row => {
+            const serialNo = row[0] || '';
+            const taskText = row[1] || '';
+            const assignee = row[2] || 'Unassigned';
+            const status = (row[3] || 'Pending').trim();
+
+            const isDone = ['done', 'completed', 'finished'].includes(status.toLowerCase());
+            if (!isDone) pendingCount++;
+
+            const li = document.createElement('li');
+            li.className = `todo-item ${isDone ? 'task-completed' : ''}`;
+            
+            li.innerHTML = `
+              <span class="todo-item-index">${serialNo}.</span>
+              <div class="todo-item-content">
+                <span class="todo-item-text">${taskText}</span>
+                <div class="todo-meta-row">
+                  <span class="todo-assignee">👤 ${assignee}</span>
+                  <span class="todo-status-tag ${isDone ? 'status-done' : 'status-active'}">• ${status}</span>
+                </div>
+              </div>
+            `;
+            listEl.appendChild(li);
+          });
+          countEl.textContent = pendingCount;
+        } else {
+          listEl.innerHTML = '<li class="todo-item"><span class="todo-item-text" style="color:#94a3b8;">All caught up!</span></li>';
+          countEl.textContent = '0';
+        }
+      } catch (err) {
+        console.error("To-Do data stream failure:", err);
+        document.getElementById('todoList').innerHTML = '<li class="todo-item"><span class="todo-item-text" style="color:#f43f5e;">Error loading tasks.</span></li>';
+      }
+    }
+
+    function sheetUrlCacheBust(url) {
+      return `${url}&cachebust=${new Date().getTime()}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', loadLiveSheetsData);
+  </script>
 </body>
 </html>
